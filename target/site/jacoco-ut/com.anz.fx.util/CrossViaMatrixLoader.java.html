@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>CrossViaMatrixLoader.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fxCalculator</a> &gt; <a href="index.source.html" class="el_package">com.anz.fx.util</a> &gt; <span class="el_source">CrossViaMatrixLoader.java</span></div><h1>CrossViaMatrixLoader.java</h1><pre class="source lang-java linenums">package com.anz.fx.util;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+import com.anz.fx.model.LookUpType;
+
+
+@Component
+<span class="nc" id="L11">public class CrossViaMatrixLoader {</span>
+
+<span class="nc" id="L13">	private Map&lt;String,Map&lt;String,String&gt;&gt; currencyPairLookUpMap</span>
+	= new HashMap&lt;&gt;();
+	
+<span class="nc" id="L16">	private Map&lt;String,Map&lt;String,String&gt;&gt; viaCurrLookUpMap</span>
+	= new HashMap&lt;&gt;();
+
+	public  Map&lt;String,Map&lt;String,String&gt;&gt; loadCrcyRelationShipMap(){
+
+<span class="nc" id="L21">		HashMap&lt;String,String&gt; audRelationMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L22">		audRelationMap.put(&quot;AUD&quot;,LookUpType.UNITY.getValue());</span>
+<span class="nc" id="L23">		audRelationMap.put(&quot;CAD&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L24">		audRelationMap.put(&quot;CNY&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L25">		audRelationMap.put(&quot;CZK&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L26">		audRelationMap.put(&quot;DKK&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L27">		audRelationMap.put(&quot;EUR&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L28">		audRelationMap.put(&quot;GBP&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L29">		audRelationMap.put(&quot;JPY&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L30">		audRelationMap.put(&quot;NOK&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L31">		audRelationMap.put(&quot;NZD&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L32">		audRelationMap.put(&quot;USD&quot;,LookUpType.DIRECT.getValue());</span>
+
+
+<span class="nc" id="L35">		HashMap&lt;String,String&gt; cadRelationMap = new HashMap&lt;String,String&gt;();</span>
+<span class="nc" id="L36">		cadRelationMap.put(&quot;AUD&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L37">		cadRelationMap.put(&quot;CAD&quot;,LookUpType.UNITY.getValue());</span>
+<span class="nc" id="L38">		cadRelationMap.put(&quot;CNY&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L39">		cadRelationMap.put(&quot;CZK&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L40">		cadRelationMap.put(&quot;DKK&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L41">		cadRelationMap.put(&quot;EUR&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L42">		cadRelationMap.put(&quot;GBP&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L43">		cadRelationMap.put(&quot;JPY&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L44">		cadRelationMap.put(&quot;NOK&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L45">		cadRelationMap.put(&quot;NZD&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L46">		cadRelationMap.put(&quot;USD&quot;,LookUpType.DIRECT.getValue());</span>
+
+
+<span class="nc" id="L49">		HashMap&lt;String,String&gt; eurRelationMap = new HashMap&lt;String,String&gt;();</span>
+<span class="nc" id="L50">		eurRelationMap.put(&quot;AUD&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L51">		eurRelationMap.put(&quot;CAD&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L52">		eurRelationMap.put(&quot;CNY&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L53">		eurRelationMap.put(&quot;CZK&quot;,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L54">		eurRelationMap.put(&quot;DKK&quot;,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L55">		eurRelationMap.put(&quot;EUR&quot;,LookUpType.UNITY.getValue());</span>
+<span class="nc" id="L56">		eurRelationMap.put(&quot;GBP&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L57">		eurRelationMap.put(&quot;JPY&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L58">		eurRelationMap.put(&quot;NOK&quot;,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L59">		eurRelationMap.put(&quot;NZD&quot;,LookUpType.VIAUSD.getValue());</span>
+<span class="nc" id="L60">		eurRelationMap.put(&quot;USD&quot;,LookUpType.DIRECT.getValue());</span>
+
+<span class="nc" id="L62">		Map&lt;String,String&gt; usdRelationMap = new HashMap&lt;String,String&gt;();</span>
+<span class="nc" id="L63">		usdRelationMap.put(&quot;AUD&quot;,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L64">		usdRelationMap.put(&quot;CAD&quot;,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L65">		usdRelationMap.put(&quot;CNY&quot;,LookUpType.DIRECT.getValue()); //requirement doc given wrongly check CNY USD also CNY/USD-INV</span>
+<span class="nc" id="L66">		usdRelationMap.put(&quot;CZK&quot;,LookUpType.VIAEUR.getValue());</span>
+<span class="nc" id="L67">		usdRelationMap.put(&quot;DKK&quot;,LookUpType.VIAEUR.getValue());</span>
+<span class="nc" id="L68">		usdRelationMap.put(&quot;EUR&quot;,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L69">		usdRelationMap.put(&quot;GBP&quot;,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L70">		usdRelationMap.put(&quot;JPY&quot;,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L71">		usdRelationMap.put(&quot;NOK&quot;,LookUpType.VIAEUR.getValue());</span>
+<span class="nc" id="L72">		usdRelationMap.put(&quot;NZD&quot;,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L73">		usdRelationMap.put(&quot;USD&quot;,LookUpType.UNITY.getValue());</span>
+
+		
+
+<span class="nc" id="L77">		currencyPairLookUpMap.put(&quot;AUD&quot;,audRelationMap);</span>
+<span class="nc" id="L78">		currencyPairLookUpMap.put(&quot;CAD&quot;,cadRelationMap);</span>
+<span class="nc" id="L79">		currencyPairLookUpMap.put(&quot;EUR&quot;,eurRelationMap);</span>
+<span class="nc" id="L80">		currencyPairLookUpMap.put(&quot;USD&quot;,usdRelationMap);</span>
+
+<span class="nc" id="L82">		System.out.println(&quot;currRelLookUpMap map... &quot; +currencyPairLookUpMap.size() );</span>
+<span class="nc" id="L83">		System.out.println(&quot;currRelLookUpMap map... &quot; +currencyPairLookUpMap.toString() );</span>
+
+<span class="nc" id="L85">		return currencyPairLookUpMap;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

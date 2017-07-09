@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>CrossCurrencyLookUpLoader.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fxCalculator</a> &gt; <a href="index.source.html" class="el_package">com.anz.fx.util</a> &gt; <span class="el_source">CrossCurrencyLookUpLoader.java</span></div><h1>CrossCurrencyLookUpLoader.java</h1><pre class="source lang-java linenums">package com.anz.fx.util;
+
+import java.util.ArrayList;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.anz.fx.model.CurrencyPair;
+import com.anz.fx.model.LookUpType;
+
+@Component
+<span class="nc" id="L15">public class CrossCurrencyLookUpLoader {</span>
+	
+<span class="nc" id="L17">	private List&lt;CurrencyPair&gt; viaUSDCurrencyPairList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L18">	private Map&lt;String,List&lt;CurrencyPair&gt;&gt; crossViaCurrencyLookUpMap = new HashMap&lt;&gt;();</span>
+	
+<span class="nc" id="L20">	private  Map&lt;CurrencyPair,String&gt; directionLookUpMap=new HashMap&lt;&gt;();</span>
+	
+<span class="nc" id="L22">	private List&lt;Currency&gt; supportedFXCurrenciesList = new ArrayList&lt;&gt;();</span>
+	
+	public List&lt;Currency&gt; getSupportedFXCurrenciesList(){
+<span class="nc" id="L25">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;AUD&quot;));</span>
+<span class="nc" id="L26">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;CAD&quot;));</span>
+<span class="nc" id="L27">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;CNY&quot;));</span>
+<span class="nc" id="L28">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;CZK&quot;));</span>
+<span class="nc" id="L29">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;DKK&quot;));</span>
+<span class="nc" id="L30">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;EUR&quot;));</span>
+<span class="nc" id="L31">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;GBP&quot;));</span>
+<span class="nc" id="L32">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;JPY&quot;));</span>
+<span class="nc" id="L33">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;NOK&quot;));</span>
+<span class="nc" id="L34">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;NZD&quot;));</span>
+<span class="nc" id="L35">		supportedFXCurrenciesList.add(Currency.getInstance(&quot;USD&quot;));</span>
+		
+<span class="nc" id="L37">		return supportedFXCurrenciesList;</span>
+	}
+	
+	public  Map&lt;CurrencyPair,String&gt; loadDirectionLookUpMap(){
+<span class="nc" id="L41">		CurrencyPair  usdAud = new CurrencyPair(&quot;USD&quot;, &quot;AUD&quot;);</span>
+		
+<span class="nc" id="L43">		CurrencyPair  audUsd = new CurrencyPair(&quot;AUD&quot;, &quot;USD&quot;);</span>
+<span class="nc" id="L44">		CurrencyPair  usdCad = new CurrencyPair(&quot;USD&quot;, &quot;CAD&quot;);</span>
+<span class="nc" id="L45">		CurrencyPair  usdCny = new CurrencyPair(&quot;USD&quot;, &quot;CNY&quot;);</span>
+<span class="nc" id="L46">		CurrencyPair  usdEur = new CurrencyPair(&quot;USD&quot;, &quot;EUR&quot;);</span>
+<span class="nc" id="L47">		CurrencyPair  usdGbp = new CurrencyPair(&quot;USD&quot;, &quot;GBP&quot;);</span>
+<span class="nc" id="L48">		CurrencyPair  gbpUsd = new CurrencyPair(&quot;GBP&quot;, &quot;USD&quot;);</span>
+<span class="nc" id="L49">		CurrencyPair  usdJpy = new CurrencyPair(&quot;USD&quot;, &quot;JPY&quot;);</span>
+<span class="nc" id="L50">		CurrencyPair  usdNzd = new CurrencyPair(&quot;USD&quot;, &quot;NZD&quot;);</span>
+<span class="nc" id="L51">		CurrencyPair  eurCzk = new CurrencyPair(&quot;EUR&quot;, &quot;CZK&quot;);</span>
+<span class="nc" id="L52">		CurrencyPair  eurDkk = new CurrencyPair(&quot;EUR&quot;, &quot;DKK&quot;);</span>
+<span class="nc" id="L53">		CurrencyPair  eurNok = new CurrencyPair(&quot;EUR&quot;, &quot;NOK&quot;);</span>
+		
+		
+<span class="nc" id="L56">		directionLookUpMap.put(usdAud,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L57">		directionLookUpMap.put(audUsd,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L58">		directionLookUpMap.put(usdCad,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L59">		directionLookUpMap.put(usdCny,LookUpType.DIRECT.getValue()); //requirement doc given wrongly check CNY USD also CNY/USD-INV</span>
+<span class="nc" id="L60">		directionLookUpMap.put(usdEur,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L61">		directionLookUpMap.put(usdGbp,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L62">		directionLookUpMap.put(gbpUsd,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L63">		directionLookUpMap.put(usdJpy,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L64">		directionLookUpMap.put(usdNzd,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L65">		directionLookUpMap.put(eurCzk,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L66">		directionLookUpMap.put(eurDkk,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L67">		directionLookUpMap.put(eurNok,LookUpType.DIRECT.getValue());</span>
+		
+		
+<span class="nc" id="L70">		return directionLookUpMap;</span>
+	}
+	
+	public Map&lt;String,List&lt;CurrencyPair&gt;&gt; loadCrossCurrencyLookUpMap(){
+<span class="nc" id="L74">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;CAD&quot;));</span>
+<span class="nc" id="L75">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;CNY&quot;));</span>
+<span class="nc" id="L76">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;CZK&quot;));</span>
+<span class="nc" id="L77">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;DKK&quot;));</span>
+<span class="nc" id="L78">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;EUR&quot;));</span>
+<span class="nc" id="L79">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L80">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L81">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L82">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;NZD&quot;));</span>
+	
+<span class="nc" id="L84">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;CNY&quot;));</span>
+<span class="nc" id="L85">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;CZK&quot;));</span>
+<span class="nc" id="L86">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;DKK&quot;));</span>
+<span class="nc" id="L87">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;EUR&quot;));</span>
+<span class="nc" id="L88">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L89">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L90">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L91">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;NZD&quot;));</span>
+	
+<span class="nc" id="L93">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;AUD&quot;));</span>
+<span class="nc" id="L94">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;GBP&quot;, &quot;NOK&quot;));</span>
+	
+<span class="nc" id="L96">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;CZK&quot;));</span>
+<span class="nc" id="L97">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;DKK&quot;));</span>
+<span class="nc" id="L98">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;EUR&quot;));</span>
+<span class="nc" id="L99">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L100">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L101">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L102">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;NZD&quot;));</span>
+	
+<span class="nc" id="L104">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L105">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L106">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;NZD&quot;));</span>
+	
+<span class="nc" id="L108">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L109">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L110">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;NZD&quot;));</span>
+	
+<span class="nc" id="L112">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L113">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L114">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;NZD&quot;));</span>
+	
+<span class="nc" id="L116">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;EUR&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L117">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;EUR&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L118">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;EUR&quot;, &quot;NZD&quot;));</span>
+	
+<span class="nc" id="L120">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;GBP&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L121">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;GBP&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L122">	viaUSDCurrencyPairList.add(new CurrencyPair(&quot;GBP&quot;, &quot;NZD&quot;));</span>
+	
+<span class="nc" id="L124">	List&lt;CurrencyPair&gt; viaEURCurrencyPairList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L125">	viaEURCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;DKK&quot;));</span>
+<span class="nc" id="L126">	viaEURCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L127">	viaEURCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;USD&quot;));</span>
+<span class="nc" id="L128">	viaEURCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L129">	viaEURCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;USD&quot;));</span>
+<span class="nc" id="L130">	viaEURCurrencyPairList.add(new CurrencyPair(&quot;NOK&quot;, &quot;USD&quot;));</span>
+
+<span class="nc" id="L132">	viaEURCurrencyPairList.add(new CurrencyPair(&quot;USD&quot;, &quot;NOK&quot;));</span>
+	
+	
+	
+<span class="nc" id="L136">	crossViaCurrencyLookUpMap.put(&quot;USD&quot;, viaUSDCurrencyPairList);</span>
+<span class="nc" id="L137">	crossViaCurrencyLookUpMap.put(&quot;EUR&quot;, viaEURCurrencyPairList);</span>
+	
+<span class="nc" id="L139">	return crossViaCurrencyLookUpMap;</span>
+	
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Localtesting.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fxCalculator</a> &gt; <a href="index.source.html" class="el_package">com.anz.fx.util</a> &gt; <span class="el_source">Localtesting.java</span></div><h1>Localtesting.java</h1><pre class="source lang-java linenums">package com.anz.fx.util;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+
+import com.anz.fx.model.CurrencyPair;
+import com.anz.fx.model.LookUpType;
+
+<span class="nc" id="L17">public class Localtesting {</span>
+
+<span class="nc" id="L19">	private static Map&lt;CurrencyPair,String&gt; directionLookUpMap=new HashMap&lt;&gt;();</span>
+<span class="nc" id="L20">	private static Map&lt;CurrencyPair,Double&gt; exchRateMap = new ExchangeRateLoader().loadExchangeRates();</span>
+	
+<span class="nc" id="L22">	private static List&lt;CurrencyPair&gt; viaUSDCurrencyPairList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L23">	private static Map&lt;String,List&lt;CurrencyPair&gt;&gt; crossViaLookUpMap</span>
+    = new HashMap&lt;&gt;();
+	
+	public static void main(String[] args) {
+<span class="nc" id="L27">		CurrencyPair  usdAud = new CurrencyPair(&quot;USD&quot;, &quot;AUD&quot;);</span>
+<span class="nc" id="L28">		CurrencyPair  usdCad = new CurrencyPair(&quot;USD&quot;, &quot;CAD&quot;);</span>
+<span class="nc" id="L29">		CurrencyPair  usdCny = new CurrencyPair(&quot;USD&quot;, &quot;CNY&quot;);</span>
+<span class="nc" id="L30">		CurrencyPair  usdEur = new CurrencyPair(&quot;USD&quot;, &quot;EUR&quot;);</span>
+<span class="nc" id="L31">		CurrencyPair  usdGbp = new CurrencyPair(&quot;USD&quot;, &quot;GBP&quot;);</span>
+<span class="nc" id="L32">		CurrencyPair  gbpUsd = new CurrencyPair(&quot;GBP&quot;, &quot;USD&quot;);</span>
+<span class="nc" id="L33">		CurrencyPair  usdJpy = new CurrencyPair(&quot;USD&quot;, &quot;JPY&quot;);</span>
+<span class="nc" id="L34">		CurrencyPair  usdNzd = new CurrencyPair(&quot;USD&quot;, &quot;NZD&quot;);</span>
+<span class="nc" id="L35">		CurrencyPair  eurCzk = new CurrencyPair(&quot;EUR&quot;, &quot;CZK&quot;);</span>
+<span class="nc" id="L36">		CurrencyPair  eurDkk = new CurrencyPair(&quot;EUR&quot;, &quot;DKK&quot;);</span>
+<span class="nc" id="L37">		CurrencyPair  eurNok = new CurrencyPair(&quot;EUR&quot;, &quot;NOK&quot;);</span>
+		
+		
+<span class="nc" id="L40">		directionLookUpMap.put(usdAud,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L41">		directionLookUpMap.put(usdCad,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L42">		directionLookUpMap.put(usdCny,LookUpType.DIRECT.getValue()); //requirement doc given wrongly check CNY USD also CNY/USD-INV</span>
+<span class="nc" id="L43">		directionLookUpMap.put(usdEur,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L44">		directionLookUpMap.put(usdGbp,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L45">		directionLookUpMap.put(gbpUsd,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L46">		directionLookUpMap.put(usdJpy,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L47">		directionLookUpMap.put(usdNzd,LookUpType.INVERSE.getValue());</span>
+<span class="nc" id="L48">		directionLookUpMap.put(eurCzk,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L49">		directionLookUpMap.put(eurDkk,LookUpType.DIRECT.getValue());</span>
+<span class="nc" id="L50">		directionLookUpMap.put(eurNok,LookUpType.DIRECT.getValue());</span>
+		
+		
+		
+		
+		
+<span class="nc" id="L56">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;CAD&quot;));</span>
+<span class="nc" id="L57">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;CNY&quot;));</span>
+<span class="nc" id="L58">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;CZK&quot;));</span>
+<span class="nc" id="L59">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;DKK&quot;));</span>
+<span class="nc" id="L60">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;EUR&quot;));</span>
+<span class="nc" id="L61">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L62">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L63">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L64">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;AUD&quot;, &quot;NZD&quot;));</span>
+<span class="nc" id="L65">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;CNY&quot;));</span>
+<span class="nc" id="L66">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;CZK&quot;));</span>
+<span class="nc" id="L67">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;DKK&quot;));</span>
+<span class="nc" id="L68">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;EUR&quot;));</span>
+<span class="nc" id="L69">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L70">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L71">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L72">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;NZD&quot;));</span>
+		
+<span class="nc" id="L74">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CAD&quot;, &quot;AUD&quot;));</span>
+<span class="nc" id="L75">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;GBP&quot;, &quot;NOK&quot;));</span>
+		
+<span class="nc" id="L77">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;CZK&quot;));</span>
+<span class="nc" id="L78">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;DKK&quot;));</span>
+<span class="nc" id="L79">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;EUR&quot;));</span>
+<span class="nc" id="L80">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L81">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L82">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L83">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CNY&quot;, &quot;NZD&quot;));</span>
+		
+<span class="nc" id="L85">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L86">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L87">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;NZD&quot;));</span>
+		
+<span class="nc" id="L89">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L90">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L91">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;NZD&quot;));</span>
+		
+<span class="nc" id="L93">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L94">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L95">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;NZD&quot;));</span>
+		
+<span class="nc" id="L97">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;EUR&quot;, &quot;GBP&quot;));</span>
+<span class="nc" id="L98">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;EUR&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L99">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;EUR&quot;, &quot;NZD&quot;));</span>
+		
+<span class="nc" id="L101">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;GBP&quot;, &quot;JPY&quot;));</span>
+<span class="nc" id="L102">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;GBP&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L103">		viaUSDCurrencyPairList.add(new CurrencyPair(&quot;GBP&quot;, &quot;NZD&quot;));</span>
+		
+<span class="nc" id="L105">		List&lt;CurrencyPair&gt; viaEURCurrencyPairList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L106">		viaEURCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;DKK&quot;));</span>
+<span class="nc" id="L107">		viaEURCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L108">		viaEURCurrencyPairList.add(new CurrencyPair(&quot;CZK&quot;, &quot;USD&quot;));</span>
+<span class="nc" id="L109">		viaEURCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;NOK&quot;));</span>
+<span class="nc" id="L110">		viaEURCurrencyPairList.add(new CurrencyPair(&quot;DKK&quot;, &quot;USD&quot;));</span>
+<span class="nc" id="L111">		viaEURCurrencyPairList.add(new CurrencyPair(&quot;NOK&quot;, &quot;USD&quot;));</span>
+	
+<span class="nc" id="L113">		viaEURCurrencyPairList.add(new CurrencyPair(&quot;USD&quot;, &quot;NOK&quot;));</span>
+		
+		
+		
+<span class="nc" id="L117">		crossViaLookUpMap.put(&quot;USD&quot;, viaUSDCurrencyPairList);</span>
+<span class="nc" id="L118">		crossViaLookUpMap.put(&quot;EUR&quot;, viaEURCurrencyPairList);</span>
+		
+		
+<span class="nc" id="L121">		String baseCurrency =&quot;GBP&quot;;</span>
+<span class="nc" id="L122">		String termCurrency =&quot;NOK&quot;;</span>
+<span class="nc" id="L123">		BigDecimal baseCurrAmt = new BigDecimal(1.00);</span>
+<span class="nc" id="L124">		BigDecimal termCurrAmt = new BigDecimal(0.00);</span>
+<span class="nc" id="L125">		double exchangeRate =0.00;</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		if(baseCurrency.equalsIgnoreCase(termCurrency)){</span>
+<span class="nc" id="L127">			System.out.println(&quot;Base and Term Cuurencies are same. So Rate is One&quot;);</span>
+<span class="nc" id="L128">			termCurrAmt = baseCurrAmt;</span>
+		}else{
+<span class="nc" id="L130">		CurrencyPair testPair= new CurrencyPair(baseCurrency,termCurrency);</span>
+<span class="nc" id="L131">		String currencyPairRelation=fetchInputCurrenciesRelation(testPair);</span>
+<span class="nc" id="L132">		System.out.println(&quot;currencyPairRelation..&quot;  +  currencyPairRelation);</span>
+	
+<span class="nc" id="L134">		termCurrAmt=computeFXAmountDirect(baseCurrency, termCurrency, baseCurrAmt);</span>
+<span class="nc" id="L135">		termCurrAmt =formatConvertedAmount(termCurrAmt, Currency.getInstance(termCurrency));</span>
+<span class="nc" id="L136">		System.out.println(&quot;termCurrAmt..&quot; +termCurrAmt);</span>
+		//computeFXAmount(currencyPairRelation,testPair,baseCurrAmt);
+	
+		}
+<span class="nc" id="L140">	}	</span>
+		
+	private static String fetchInputCurrenciesRelation(CurrencyPair currencyPair){
+		
+<span class="nc" id="L144">		String crossViaCurrency =null;</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		if(directionLookUpMap.keySet().contains(currencyPair)){</span>
+<span class="nc" id="L146">			System.out.println(&quot;It is a direct or Indirect  look Up&quot;);</span>
+<span class="nc" id="L147">			crossViaCurrency = directionLookUpMap.get(currencyPair);</span>
+			
+		}else{
+			
+<span class="nc" id="L151">			System.out.println(&quot;Involves Via curr&quot;);</span>
+			
+<span class="nc bnc" id="L153" title="All 2 branches missed.">			for(Map.Entry entry:crossViaLookUpMap.entrySet()){</span>
+<span class="nc" id="L154">					    System.out.print(entry.getKey());</span>
+<span class="nc" id="L155">							List&lt;CurrencyPair&gt; crossCurrencyList = (List&lt;CurrencyPair&gt;)entry.getValue();</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">							if(crossCurrencyList.contains(currencyPair)){</span>
+<span class="nc" id="L157">								crossViaCurrency= entry.getKey().toString();</span>
+							}
+<span class="nc" id="L159">				}</span>
+			}
+<span class="nc" id="L161">		  return crossViaCurrency;</span>
+		}
+
+	private static double computeExchangeRate(String lookUpType,CurrencyPair currencyPair){
+<span class="nc" id="L165">		double exchangeRate = 0.00;</span>
+		
+		
+<span class="nc bnc" id="L168" title="All 2 branches missed.">		if(lookUpType.equalsIgnoreCase(LookUpType.DIRECT.getValue())){</span>
+<span class="nc" id="L169">			 exchangeRate=exchRateMap.get(currencyPair);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		}else if(lookUpType.equalsIgnoreCase(LookUpType.INVERSE.getValue())){</span>
+<span class="nc" id="L171">			exchangeRate =1/(exchRateMap.get(new CurrencyPair(currencyPair.getTermCurrKey(), currencyPair.getBaseCurrKey())));</span>
+		}
+		
+		
+<span class="nc" id="L175">		return exchangeRate;</span>
+	}
+	
+	private static BigDecimal computeFXAmount(String currPairLookUp, CurrencyPair currencyPair, BigDecimal baseCurrencyAmt){
+		
+<span class="nc" id="L180">		double currPairExchRate= 0.00;</span>
+<span class="nc" id="L181">		BigDecimal termCurrencyAmount =new BigDecimal(0.00);</span>
+		
+<span class="nc bnc" id="L183" title="All 2 branches missed.">		if(currPairLookUp.equalsIgnoreCase(LookUpType.DIRECT.getValue() )||</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">				currPairLookUp.equalsIgnoreCase(LookUpType.INVERSE.getValue() )   ){</span>
+<span class="nc" id="L185">			System.out.println(&quot;Computing Amount for Direct/Indirect relation&quot;);</span>
+<span class="nc" id="L186">			currPairExchRate =computeExchangeRate(currPairLookUp,currencyPair);</span>
+<span class="nc" id="L187">			System.out.println(&quot;currPairExchRate.. &quot; + currPairExchRate);</span>
+<span class="nc" id="L188">			termCurrencyAmount = baseCurrencyAmt.multiply(new BigDecimal(currPairExchRate));</span>
+		}else{
+<span class="nc" id="L190">			computeAmtforViaCurrencies(currencyPair,baseCurrencyAmt,currPairLookUp);</span>
+		}
+		
+<span class="nc" id="L193">		return termCurrencyAmount;</span>
+		
+	}
+
+	private static BigDecimal computeAmtforViaCurrencies(CurrencyPair currencyPair,
+			BigDecimal baseCurrAmt,String lookUpType){
+		
+<span class="nc" id="L200">		System.out.println(&quot;In computeAmtforViaCurrencies &quot; + lookUpType);</span>
+<span class="nc" id="L201">		CurrencyPair baseViaCurrPair = new CurrencyPair(currencyPair.getBaseCurrKey(),lookUpType);</span>
+<span class="nc" id="L202">		String baseViaCurrPairRel = fetchInputCurrenciesRelation(baseViaCurrPair);</span>
+<span class="nc" id="L203">		System.out.println(&quot;baseViaCurrPairRel...&quot; + baseViaCurrPairRel);</span>
+		
+<span class="nc" id="L205">		BigDecimal baseToViaCurrAmount= baseCurrAmt;</span>
+<span class="nc" id="L206">		BigDecimal convertedCurrAmount= null;</span>
+<span class="nc" id="L207">		double baseViaCurrPairExchRate= 0.00;</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">		if(baseViaCurrPairRel.equalsIgnoreCase(LookUpType.DIRECT.getValue()) || </span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">				baseViaCurrPairRel.equalsIgnoreCase(LookUpType.INVERSE.getValue())){</span>
+<span class="nc" id="L210">			 baseViaCurrPairExchRate=computeExchangeRate(baseViaCurrPairRel, baseViaCurrPair);</span>
+<span class="nc" id="L211">			 baseToViaCurrAmount = baseCurrAmt.multiply(new BigDecimal(baseViaCurrPairExchRate));</span>
+		}else{
+<span class="nc" id="L213">			CurrencyPair crossViaPair = new CurrencyPair(baseViaCurrPair.getBaseCurrKey(),baseViaCurrPairRel);</span>
+<span class="nc" id="L214">			computeAmtforViaCurrencies(crossViaPair,baseToViaCurrAmount,baseViaCurrPairRel);</span>
+		}
+		
+<span class="nc" id="L217">		CurrencyPair viaTermCurrPair = new CurrencyPair(lookUpType, currencyPair.getTermCurrKey());</span>
+<span class="nc" id="L218">		String viaTermCurrPairRel =fetchInputCurrenciesRelation(viaTermCurrPair);</span>
+<span class="nc" id="L219">		System.out.println(&quot;viaTermCurrPairRel...&quot; + viaTermCurrPairRel);</span>
+<span class="nc" id="L220">		double viaTermCurrPairExchRate=computeExchangeRate(viaTermCurrPairRel, viaTermCurrPair);</span>
+<span class="nc" id="L221">		convertedCurrAmount = baseToViaCurrAmount.multiply(new BigDecimal(viaTermCurrPairExchRate));</span>
+<span class="nc" id="L222">		System.out.println(&quot;convertedCurrAmount...&quot; +convertedCurrAmount);</span>
+		
+<span class="nc" id="L224">		return formatConvertedAmount(convertedCurrAmount,Currency.getInstance(currencyPair.getTermCurrKey()));</span>
+	}
+	
+	private static BigDecimal formatConvertedAmount(BigDecimal calculatedAmount, Currency termCurrency){
+<span class="nc" id="L228">		return calculatedAmount.setScale(termCurrency.getDefaultFractionDigits(), RoundingMode.UP);</span>
+		
+	}
+	
+	
+	private static BigDecimal computeFXAmountDirect(String baseCurrencyCode, String termCurrencyCode, BigDecimal baseCurrAmt) {
+		
+<span class="nc" id="L235">		CurrencyPair  currencyPair = new CurrencyPair(baseCurrencyCode, termCurrencyCode);</span>
+<span class="nc" id="L236">		String currencyPairRelation = fetchInputCurrenciesRelation(currencyPair);</span>
+<span class="nc" id="L237">		double currPairExchRate= 0.00;</span>
+<span class="nc" id="L238">		Stack&lt;CurrencyPair&gt; currencyPairStack =new Stack&lt;&gt;();</span>
+		
+<span class="nc" id="L240">		BigDecimal termCurrencyAmount =baseCurrAmt;</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">		if(currencyPairRelation.equalsIgnoreCase(LookUpType.DIRECT.getValue() )||</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">				currencyPairRelation.equalsIgnoreCase(LookUpType.INVERSE.getValue() )   ){</span>
+<span class="nc" id="L243">			System.out.println(&quot;Computing Amount for Direct/Indirect relation&quot;);</span>
+<span class="nc" id="L244">			currPairExchRate =computeExchangeRate(currencyPairRelation,currencyPair);</span>
+<span class="nc" id="L245">			System.out.println(&quot;currPairExchRate.. &quot; + currPairExchRate);</span>
+<span class="nc" id="L246">			termCurrencyAmount = baseCurrAmt.multiply(new BigDecimal(currPairExchRate));</span>
+			//return termCurrencyAmount;
+		}else{
+<span class="nc" id="L249">			currencyPairStack.push(new CurrencyPair(currencyPairRelation, termCurrencyCode));</span>
+<span class="nc" id="L250">			currencyPairStack.push(new CurrencyPair(baseCurrencyCode, currencyPairRelation));</span>
+			
+			do {
+<span class="nc" id="L253">					CurrencyPair currentCurrencyPair = currencyPairStack.pop();</span>
+<span class="nc" id="L254">					System.out.println(&quot;currentCurrencyPair.getBaseCurrKey()..&quot; + currentCurrencyPair.getBaseCurrKey());</span>
+<span class="nc" id="L255">					System.out.println(&quot;currentCurrencyPair.getTermCurrKey()..&quot; + currentCurrencyPair.getTermCurrKey());</span>
+<span class="nc" id="L256">					termCurrencyAmount = computeFXAmountDirect(currentCurrencyPair.getBaseCurrKey(),currentCurrencyPair.getTermCurrKey(), termCurrencyAmount);</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">				} while (!currencyPairStack.isEmpty());</span>
+			
+		}
+<span class="nc" id="L260">		return termCurrencyAmount;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

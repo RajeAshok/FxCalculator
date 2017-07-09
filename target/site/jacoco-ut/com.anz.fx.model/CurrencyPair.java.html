@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>CurrencyPair.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fxCalculator</a> &gt; <a href="index.source.html" class="el_package">com.anz.fx.model</a> &gt; <span class="el_source">CurrencyPair.java</span></div><h1>CurrencyPair.java</h1><pre class="source lang-java linenums">package com.anz.fx.model;
+
+public class CurrencyPair {
+	private  String baseCurrKey;
+
+	private  String termCurrKey;
+
+<span class="nc" id="L8">	public CurrencyPair( String baseCurrKey,  String termCurrKey){</span>
+<span class="nc" id="L9">		this.baseCurrKey= baseCurrKey;</span>
+<span class="nc" id="L10">		this.termCurrKey = termCurrKey;</span>
+<span class="nc" id="L11">	}</span>
+
+	@Override
+	public boolean equals(final Object O){
+<span class="nc bnc" id="L15" title="All 2 branches missed.">		if(this == O ) return true;</span>
+<span class="nc bnc" id="L16" title="All 2 branches missed.">		if(!(O instanceof CurrencyPair)) </span>
+<span class="nc" id="L17">			return false;</span>
+
+<span class="nc" id="L19">		CurrencyPair currencyPair = (CurrencyPair)O;</span>
+<span class="nc bnc" id="L20" title="All 4 branches missed.">		return (baseCurrKey.equalsIgnoreCase(currencyPair.baseCurrKey)   &amp;&amp; termCurrKey.equalsIgnoreCase(currencyPair.termCurrKey));</span>
+
+	}
+
+	@Override
+	public int hashCode(){
+<span class="nc" id="L26">		return baseCurrKey.hashCode()+ termCurrKey.hashCode();</span>
+
+	}
+
+	public String getBaseCurrKey() {
+<span class="nc" id="L31">		return baseCurrKey;</span>
+	}
+
+	public String getTermCurrKey() {
+<span class="nc" id="L35">		return termCurrKey;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FXCalculatorServiceImpl.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fxCalculator</a> &gt; <a href="index.source.html" class="el_package">com.anz.fx.service</a> &gt; <span class="el_source">FXCalculatorServiceImpl.java</span></div><h1>FXCalculatorServiceImpl.java</h1><pre class="source lang-java linenums">package com.anz.fx.service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Currency;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.anz.fx.exception.UnSupportedCurrencyException;
+import com.anz.fx.model.CurrencyPair;
+import com.anz.fx.model.LookUpType;
+import com.anz.fx.util.CrossCurrencyLookUpLoader;
+import com.anz.fx.util.ExchangeRateLoader;
+
+@Component
+<span class="fc" id="L20">public class FXCalculatorServiceImpl implements FXCalculatorService {</span>
+
+	@Autowired
+	private CrossCurrencyLookUpLoader crossCurrencyLookUpLoader;
+
+	@Autowired
+	private ExchangeRateLoader exchangeRateLoader;
+
+<span class="fc" id="L28">	private Map&lt;String,List&lt;CurrencyPair&gt;&gt; crossViaCurrencyLookUpMap = null ;</span>
+
+<span class="fc" id="L30">	private  Map&lt;CurrencyPair,String&gt; directionLookUpMap =null;</span>
+
+<span class="fc" id="L32">	private  Map&lt;CurrencyPair,Double&gt; baseTermCurrencyExchangeRateMap =null;</span>
+
+	@Override
+	public BigDecimal calculateFXAmount(String baseCurrencyCode,
+			BigDecimal baseCurrencyAmount, String termCurrencyCode)
+					throws UnSupportedCurrencyException {
+
+
+		//validateBaseTermCurrencies(baseCurencyCode,termCuurencyCode);
+		//validateBaseCurrencyAmount();
+<span class="nc" id="L42">		crossViaCurrencyLookUpMap = crossCurrencyLookUpLoader.loadCrossCurrencyLookUpMap();</span>
+<span class="nc" id="L43">		directionLookUpMap =crossCurrencyLookUpLoader.loadDirectionLookUpMap();</span>
+<span class="nc" id="L44">		baseTermCurrencyExchangeRateMap = exchangeRateLoader.loadExchangeRates();</span>
+
+<span class="nc" id="L46">		BigDecimal termCurrencyAmount = new BigDecimal(0.00);</span>
+<span class="nc" id="L47">		boolean sameBaseTermCurrency=checkForSameBaseTermCurrency(baseCurrencyCode,termCurrencyCode);</span>
+
+<span class="nc bnc" id="L49" title="All 2 branches missed.">		if(sameBaseTermCurrency){</span>
+<span class="nc" id="L50">			termCurrencyAmount = baseCurrencyAmount;</span>
+		}else{
+<span class="nc" id="L52">			termCurrencyAmount=computeFXAmount(baseCurrencyCode, termCurrencyCode, baseCurrencyAmount);</span>
+		}
+
+<span class="nc" id="L55">		termCurrencyAmount =formatConvertedAmount(termCurrencyAmount, Currency.getInstance(termCurrencyCode));</span>
+<span class="nc" id="L56">		System.out.println(&quot;termCurrencyAmount..&quot; +termCurrencyAmount);</span>
+<span class="nc" id="L57">		return termCurrencyAmount;</span>
+	}
+
+	/**
+	 * 
+	 * @param baseCurrencyCode
+	 * @param termCurrencyCode
+	 * @return
+	 */
+	 boolean checkForSameBaseTermCurrency(String baseCurrencyCode,String termCurrencyCode){
+<span class="fc bfc" id="L67" title="All 2 branches covered.">		if(baseCurrencyCode.equalsIgnoreCase(termCurrencyCode)){</span>
+<span class="fc" id="L68">			return true;</span>
+		}else{
+<span class="fc" id="L70">			return false;</span>
+		}		
+	}
+
+
+	private String fetchCurrencyPairLookUpType(CurrencyPair currencyPair){
+<span class="nc" id="L76">		String lookUpType =null;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if(directionLookUpMap.keySet().contains(currencyPair)){</span>
+<span class="nc" id="L78">			System.out.println(&quot;It is a direct or Indirect  look Up&quot;);</span>
+<span class="nc" id="L79">			lookUpType = directionLookUpMap.get(currencyPair);</span>
+
+		}else{
+<span class="nc" id="L82">			System.out.println(&quot;Involves Via curr&quot;);</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">			for(Map.Entry entry:crossViaCurrencyLookUpMap.entrySet()){</span>
+<span class="nc" id="L84">				List&lt;CurrencyPair&gt; crossCurrencyList = (List&lt;CurrencyPair&gt;)entry.getValue();</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">				if(crossCurrencyList.contains(currencyPair)){</span>
+<span class="nc" id="L86">					lookUpType= entry.getKey().toString();</span>
+				}
+<span class="nc" id="L88">			}</span>
+		}
+<span class="nc" id="L90">		System.out.println(&quot;lookUpType returned..&quot; +lookUpType);</span>
+<span class="nc" id="L91">		return lookUpType;</span>
+	}
+
+	/**
+	 * Compute exchange rate based on the loaded Map with Currency Pair and exchange rate details
+	 * for certain currencyPairs with INVERSE relation , need to look up with proper order of Currencies in CurrencyPair object
+	 * @param lookUpType
+	 * @param currencyPair
+	 * @return
+	 */
+	private double computeExchangeRate(String lookUpType,CurrencyPair currencyPair){
+<span class="nc" id="L102">		double exchangeRate = 0.00;</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">		if(lookUpType.equalsIgnoreCase(LookUpType.DIRECT.getValue())){</span>
+<span class="nc" id="L104">			exchangeRate=baseTermCurrencyExchangeRateMap.get(currencyPair);</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		}else if(lookUpType.equalsIgnoreCase(LookUpType.INVERSE.getValue())){</span>
+<span class="nc" id="L106">			exchangeRate =1/(baseTermCurrencyExchangeRateMap.get(new CurrencyPair(currencyPair.getTermCurrKey(), currencyPair.getBaseCurrKey())));</span>
+		}
+<span class="nc" id="L108">		return exchangeRate;</span>
+	}
+
+	/**
+	 * Calculate the Amount in the term currency provided as input using exchange rate 
+	 * Used this formula to calculate the converted amount:  &quot;termCurrencyAmount = baseCurrencyAmount * exchange rate for that BASE/TERM
+	 * performed recursion as the currency look up involves cross via look ups other than direct and Indirect
+	 * @param baseCurrencyCode
+	 * @param termCurrencyCode
+	 * @param baseCurrencyAmount
+	 * @return
+	 */
+	private BigDecimal computeFXAmount(String baseCurrencyCode, String termCurrencyCode,BigDecimal baseCurrencyAmount){
+
+<span class="nc" id="L122">		CurrencyPair  currencyPair = new CurrencyPair(baseCurrencyCode, termCurrencyCode);</span>
+<span class="nc" id="L123">		String currencyPairRelation = fetchCurrencyPairLookUpType(currencyPair);</span>
+<span class="nc" id="L124">		double currencyPairExchangeRate= 0.00;</span>
+<span class="nc" id="L125">		Stack&lt;CurrencyPair&gt; currencyPairStack =new Stack&lt;&gt;();</span>
+<span class="nc" id="L126">		BigDecimal termCurrencyAmount =baseCurrencyAmount;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		if(currencyPairRelation.equalsIgnoreCase(LookUpType.DIRECT.getValue() )||</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">				currencyPairRelation.equalsIgnoreCase(LookUpType.INVERSE.getValue() )   ){</span>
+<span class="nc" id="L129">			System.out.println(&quot;Computing Amount for Direct/Indirect relation&quot;);</span>
+<span class="nc" id="L130">			currencyPairExchangeRate =computeExchangeRate(currencyPairRelation,currencyPair);</span>
+<span class="nc" id="L131">			System.out.println(&quot;currPairExchRate.. &quot; + currencyPairExchangeRate);</span>
+<span class="nc" id="L132">			termCurrencyAmount = baseCurrencyAmount.multiply(new BigDecimal(currencyPairExchangeRate));</span>
+
+		}else{
+<span class="nc" id="L135">			currencyPairStack.push(new CurrencyPair(currencyPairRelation, termCurrencyCode));</span>
+<span class="nc" id="L136">			currencyPairStack.push(new CurrencyPair(baseCurrencyCode, currencyPairRelation));</span>
+
+			do {
+<span class="nc" id="L139">				CurrencyPair currentCurrencyPair = currencyPairStack.pop();</span>
+<span class="nc" id="L140">				System.out.println(&quot;currentCurrencyPair.getBaseCurrKey()..&quot; + currentCurrencyPair.getBaseCurrKey());</span>
+<span class="nc" id="L141">				System.out.println(&quot;currentCurrencyPair.getTermCurrKey()..&quot; + currentCurrencyPair.getTermCurrKey());</span>
+<span class="nc" id="L142">				termCurrencyAmount = computeFXAmount(currentCurrencyPair.getBaseCurrKey(),currentCurrencyPair.getTermCurrKey(), termCurrencyAmount);</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">			} while (!currencyPairStack.isEmpty());</span>
+
+		}
+<span class="nc" id="L146">		return termCurrencyAmount;</span>
+	}
+
+	private BigDecimal formatConvertedAmount(BigDecimal calculatedAmount, Currency termCurrency){
+<span class="nc" id="L150">		return calculatedAmount.setScale(termCurrency.getDefaultFractionDigits(), RoundingMode.UP);</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

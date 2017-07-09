@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FXCurrencyUtil.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">fxCalculator</a> &gt; <a href="index.source.html" class="el_package">com.anz.fx.util</a> &gt; <span class="el_source">FXCurrencyUtil.java</span></div><h1>FXCurrencyUtil.java</h1><pre class="source lang-java linenums">package com.anz.fx.util;
+
+import java.util.Currency;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+<span class="nc" id="L10">public class FXCurrencyUtil {</span>
+
+	@Autowired
+	private CrossCurrencyLookUpLoader crossCurrencyLookUpLoader;
+	
+	public String validateBaseTermCurrencies(String baseCurrencyCode,String termCurrencyCode){
+		
+<span class="nc" id="L17">		String validationMessage =&quot;&quot;;</span>
+<span class="nc bnc" id="L18" title="All 4 branches missed.">		if(baseCurrencyCode!=null &amp;&amp; !baseCurrencyCode.isEmpty()){</span>
+<span class="nc bnc" id="L19" title="All 4 branches missed.">			if(termCurrencyCode!=null &amp;&amp; !termCurrencyCode.isEmpty()){</span>
+				
+<span class="nc bnc" id="L21" title="All 2 branches missed.">				if(Currency.getAvailableCurrencies().contains(baseCurrencyCode)){</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">					if(Currency.getAvailableCurrencies().contains(termCurrencyCode)){</span>
+<span class="nc" id="L23">						List&lt;Currency&gt; supportedFXCurrenciesList = crossCurrencyLookUpLoader.getSupportedFXCurrenciesList();</span>
+<span class="nc" id="L24">						Currency baseCurrency = Currency.getInstance(baseCurrencyCode);</span>
+<span class="nc" id="L25">						Currency termCurrency = Currency.getInstance(termCurrencyCode);</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">						if(supportedFXCurrenciesList.contains(baseCurrency)){</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">							if(supportedFXCurrenciesList.contains(termCurrency)){</span>
+							  //base term  currency all fine
+							}else{
+<span class="nc" id="L30">								validationMessage+=&quot;Term Currency Code provided is not Supported .Please enter a valid Term Currency Code. &quot;;</span>
+							}
+						}else{
+<span class="nc" id="L33">							validationMessage+=&quot;Base Currency Code provided is not Supported .Please enter a valid Base Currency Code. &quot;;</span>
+						}
+						
+<span class="nc" id="L36">					}else{</span>
+<span class="nc" id="L37">						validationMessage+=&quot;Term Currency Code provided is not a valid ISO Currency Code .Please enter a valid Base Currency Code. &quot;;</span>
+					}
+					
+				}else{
+<span class="nc" id="L41">					validationMessage+=&quot;Base Currency Code provided is not a valid ISO Currency Code .Please enter a valid Base Currency Code. &quot;;</span>
+				}
+				
+			}else{
+<span class="nc" id="L45">				validationMessage+=&quot;Term Currency Code cannot be empty .Please enter a valid value. &quot;;</span>
+			}
+		}else{
+<span class="nc" id="L48">			validationMessage+=&quot;Base Currency Code cannot be empty .Please enter a valid value. &quot;;</span>
+		}
+<span class="nc" id="L50">		return validationMessage;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
