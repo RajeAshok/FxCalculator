@@ -40,7 +40,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 		exchangeRateLoaderService.loadBaseTermCurrencyExchangeRates();
 		validateBaseTermCurrencies(baseCurrencyCode,termCurrencyCode);
 		BigDecimal baseCurrencyAmount = new BigDecimal(0.00);
-		 baseCurrencyAmount=validateBaseCurrencyAmount(baseCurrencyAmountString);
+		baseCurrencyAmount=validateBaseCurrencyAmount(baseCurrencyAmountString);
 
 		BigDecimal termCurrencyAmount = new BigDecimal(0.00);
 		boolean sameBaseTermCurrency = checkForSameBaseTermCurrency(
@@ -49,12 +49,10 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 		if (sameBaseTermCurrency) {
 			termCurrencyAmount = baseCurrencyAmount;
 		} else {
-			termCurrencyAmount = computeFXAmount(baseCurrencyCode,
-					termCurrencyCode, baseCurrencyAmount);
+			termCurrencyAmount = computeFXAmount(baseCurrencyCode,termCurrencyCode, baseCurrencyAmount);
 		}
 
-		termCurrencyAmount = formatConvertedAmount(termCurrencyAmount,
-				Currency.getInstance(termCurrencyCode));
+		termCurrencyAmount = formatConvertedAmount(termCurrencyAmount,Currency.getInstance(termCurrencyCode));
 		System.out.println("termCurrencyAmount.." + termCurrencyAmount);
 		return termCurrencyAmount;
 	}
@@ -65,7 +63,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 	 * @param termCurrencyCode
 	 * @return
 	 */
-	boolean checkForSameBaseTermCurrency(String baseCurrencyCode,
+	protected boolean checkForSameBaseTermCurrency(String baseCurrencyCode,
 			String termCurrencyCode) {
 		if (baseCurrencyCode.equalsIgnoreCase(termCurrencyCode)) {
 			return true;
@@ -74,7 +72,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 		}
 	}
 	
-	private String fetchCurrencyPairLookUpType(CurrencyPair currencyPair) {
+	protected String fetchCurrencyPairLookUpType(CurrencyPair currencyPair) {
 		String lookUpType = null;
 
 		Map<String, List<CurrencyPair>> crossViaCurrencyLookUpMap = null;
@@ -111,7 +109,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 	 * @param currencyPair
 	 * @return
 	 */
-	double computeExchangeRate(String lookUpType, CurrencyPair currencyPair) {
+	protected double computeExchangeRate(String lookUpType, CurrencyPair currencyPair) {
 		double exchangeRate = 0.00;
 		Map<CurrencyPair, Double> baseTermCurrencyExchangeRateMap = exchangeRateLoaderService
 				.fetchBaseCurrencyExchangeRateMap();
@@ -122,7 +120,6 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 					.get(new CurrencyPair(currencyPair.getTermCurrKey(),
 							currencyPair.getBaseCurrKey())));
 		}
-
 		return exchangeRate;
 	}
 
@@ -138,7 +135,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 	 * @param baseCurrencyAmount
 	 * @return
 	 */
-	private BigDecimal computeFXAmount(String baseCurrencyCode,
+	protected BigDecimal computeFXAmount(String baseCurrencyCode,
 			String termCurrencyCode, BigDecimal baseCurrencyAmount) {
 
 		CurrencyPair currencyPair = new CurrencyPair(baseCurrencyCode,
@@ -148,16 +145,11 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 		Stack<CurrencyPair> currencyPairStack = new Stack<>();
 		BigDecimal termCurrencyAmount = baseCurrencyAmount;
 		if (currencyPairRelation.equalsIgnoreCase(LookUpType.DIRECT.getValue())
-				|| currencyPairRelation.equalsIgnoreCase(LookUpType.INVERSE
-						.getValue())) {
+				|| currencyPairRelation.equalsIgnoreCase(LookUpType.INVERSE.getValue())) {
 			System.out.println("Computing Amount for Direct/Indirect relation");
-			currencyPairExchangeRate = computeExchangeRate(
-					currencyPairRelation, currencyPair);
-			System.out
-			.println("currPairExchRate.. " + currencyPairExchangeRate);
-			termCurrencyAmount = baseCurrencyAmount.multiply(new BigDecimal(
-					currencyPairExchangeRate));
-
+			currencyPairExchangeRate = computeExchangeRate(currencyPairRelation, currencyPair);
+			System.out.println("currPairExchRate.. " + currencyPairExchangeRate);
+			termCurrencyAmount = baseCurrencyAmount.multiply(new BigDecimal(currencyPairExchangeRate));
 		} else {
 			currencyPairStack.push(new CurrencyPair(currencyPairRelation,
 					termCurrencyCode));
@@ -175,67 +167,48 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 						currentCurrencyPair.getTermCurrKey(),
 						termCurrencyAmount);
 			} while (!currencyPairStack.isEmpty());
-
 		}
 		return termCurrencyAmount;
 	}
 
-	 //Utility Methods
-	private BigDecimal formatConvertedAmount(BigDecimal calculatedAmount,
-			Currency termCurrency) {
-		return calculatedAmount.setScale(
-				termCurrency.getDefaultFractionDigits(), RoundingMode.UP);
-
+	 //Utility Method to format the currency based on precision
+	protected BigDecimal formatConvertedAmount(BigDecimal calculatedAmount,Currency termCurrency) {
+		return calculatedAmount.setScale(termCurrency.getDefaultFractionDigits(), RoundingMode.UP);
 	}
 	
   
-public void validateBaseTermCurrencies(String baseCurrencyCode,String termCurrencyCode) throws FXDetailValidationException, UnSupportedCurrencyException{
-		
-		String validationMessage ="";
-		if(baseCurrencyCode!=null && !baseCurrencyCode.isEmpty()){
-			//base currency not empty
-		}else{
-			validationMessage+="Validation Error.Base Currency Code cannot be empty .Please enter a value. ";
+	protected void validateBaseTermCurrencies(String baseCurrencyCode,String termCurrencyCode) 
+			 throws FXDetailValidationException, UnSupportedCurrencyException{
+
+		StringBuilder displayErrorMessage= new StringBuilder("Validation Error.");
+		if(baseCurrencyCode == null || baseCurrencyCode.isEmpty()){
+			displayErrorMessage.append("Base Currency Code cannot be empty .Please enter a value. ");
+			throw new FXDetailValidationException(displayErrorMessage.toString());
 		}
-		if(termCurrencyCode!=null && !termCurrencyCode.isEmpty()){
-		 //term currency not empty 
+		if(termCurrencyCode == null || termCurrencyCode.isEmpty()){
+			displayErrorMessage.append("Term Currency Code cannot be empty .Please enter a value. ");
+			throw new FXDetailValidationException(displayErrorMessage.toString());
 		}
-		else{
-			validationMessage+="Term Currency Code cannot be empty .Please enter a value. ";
-		}
-		
-		if(validationMessage.length()> 0){
-			String displayErrorMessage="Validation Error.";
-			displayErrorMessage=displayErrorMessage.concat(validationMessage);
-			throw new FXDetailValidationException(displayErrorMessage);
-		}else{
-			checkIfBaseTermCurrencyIsSupported(baseCurrencyCode,termCurrencyCode);
-		}
-		
+			
+		checkIfBaseTermCurrencyIsSupported(baseCurrencyCode,termCurrencyCode);	
 	}
 
-	private void checkIfBaseTermCurrencyIsSupported(String baseCurrencyCode,String termCurrencyCode) throws UnSupportedCurrencyException {
-		List<String> supportedFXCurrenciesList = crossViaCurrencyLookUpService
-				.fetchSupportedFXCurrenciesList();
+	protected void checkIfBaseTermCurrencyIsSupported(String baseCurrencyCode,String termCurrencyCode) throws UnSupportedCurrencyException {
+		List<String> supportedFXCurrenciesList = crossViaCurrencyLookUpService.fetchSupportedFXCurrenciesList();
 
-		String unSupportedErrorMessage ="";
+		StringBuilder displayErrorMessage = new StringBuilder("Unable to find rate for " + baseCurrencyCode +"/" + termCurrencyCode + ".") ;
 		if (!supportedFXCurrenciesList.contains(baseCurrencyCode)) {
-		
-			unSupportedErrorMessage += "Base Currency Code provided is not supported .Please enter a valid Base Currency Code. ";
+			displayErrorMessage.append("Base Currency Code provided is not supported .Please enter a valid Base Currency Code. ");
+			throw new UnSupportedCurrencyException(displayErrorMessage.toString());
 		}
 		if (!supportedFXCurrenciesList.contains(termCurrencyCode)) {
-			unSupportedErrorMessage += "Term Currency Code provided is not supported .Please enter a valid Term Currency Code. ";
+			displayErrorMessage.append("Term Currency Code provided is not supported .Please enter a valid Term Currency Code. ");
+			throw new UnSupportedCurrencyException(displayErrorMessage.toString());
 		}
-		
-		if(unSupportedErrorMessage.length()>0){
-			String displayErrorMessage = "Unable to find rate for " + baseCurrencyCode +"/" + termCurrencyCode + "." ;
-			displayErrorMessage=displayErrorMessage.concat(unSupportedErrorMessage);
-			throw new UnSupportedCurrencyException(displayErrorMessage);
-		}
+
 	}
 	
-	private BigDecimal validateBaseCurrencyAmount(String baseCurrAmount) throws FXDetailValidationException{
-		
+	protected BigDecimal validateBaseCurrencyAmount(String baseCurrAmount) throws FXDetailValidationException{
 		
 		BigDecimal baseCurrencyAmount = new BigDecimal(0.00);
 		try{

@@ -13,8 +13,8 @@ import com.anz.fx.exception.UnSupportedCurrencyException;
 import com.anz.fx.service.FXCalculatorService;
 
 /**
- * FX Calculator App : Calculates the foreign exchange Amount : 
- * Input should be Base Currency code  ,Amount in Base Currency and Term Currency Code
+ * FX Calculator App : Calculates the foreign exchange Amount for a given pair of currency codes and the exchange amount 
+ * Input should be specified in the format: <BASE CURRENCY CODE> <AMOUNT> IN <TERM CURRENCY CODE>
  * @author AshRaje
  *
  */
@@ -51,9 +51,10 @@ public class FXCalculatorApp implements CommandLineRunner {
 				baseCurrencyCode=fxCurrencyDetails[0];
 				baseCurrencyAmount= fxCurrencyDetails[1];
 				termCurrencyCode= fxCurrencyDetails[3];
-		        BigDecimal convertedAmount = new BigDecimal(0.00);
+		
 				try {
-					convertedAmount = fxCalcService.calculateFXAmount(baseCurrencyCode, baseCurrencyAmount, termCurrencyCode);
+				     BigDecimal convertedAmount = new BigDecimal(0.00);
+					 convertedAmount = fxCalcService.calculateFXAmount(baseCurrencyCode, baseCurrencyAmount, termCurrencyCode);
 				} catch (UnSupportedCurrencyException | FXDetailValidationException e) {
 					// TODO Auto-generated catch block
 					System.out.println(e.getMessage());

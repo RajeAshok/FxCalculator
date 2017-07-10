@@ -39,7 +39,6 @@ public class CrossCurrencyLookUpLoader {
 	
 	public  Map<CurrencyPair,String> loadDirectionLookUpMap(){
 		CurrencyPair  usdAud = new CurrencyPair("USD", "AUD");
-		
 		CurrencyPair  audUsd = new CurrencyPair("AUD", "USD");
 		CurrencyPair  usdCad = new CurrencyPair("USD", "CAD");
 		CurrencyPair  usdCny = new CurrencyPair("USD", "CNY");
