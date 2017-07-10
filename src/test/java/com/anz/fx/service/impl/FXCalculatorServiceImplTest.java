@@ -1,8 +1,9 @@
-package com.anz.fx.service;
+package com.anz.fx.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import org.mockito.internal.util.reflection.Whitebox;
 
 import com.anz.fx.model.CurrencyPair;
 import com.anz.fx.model.LookUpType;
+import com.anz.fx.service.impl.FXCalculatorServiceImpl;
 import com.anz.fx.util.ExchangeRateLoader;
 
 public class FXCalculatorServiceImplTest {

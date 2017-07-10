@@ -1,138 +1,57 @@
-package com.anz.fx.service;
+package com.anz.fx.service.impl;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.anz.fx.exception.UnSupportedCurrencyException;
 import com.anz.fx.model.CurrencyPair;
 import com.anz.fx.model.LookUpType;
+import com.anz.fx.service.CrossViaCurrencyLookUpService;
+import com.anz.fx.service.ExchangeRateLoaderService;
+import com.anz.fx.service.FXCalculatorService;
 import com.anz.fx.util.CrossCurrencyLookUpLoader;
 import com.anz.fx.util.ExchangeRateLoader;
 
-@Component
+@Service
 public class FXCalculatorServiceImpl implements FXCalculatorService {
 
 	@Autowired
-	private CrossCurrencyLookUpLoader crossCurrencyLookUpLoader;
+	private CrossViaCurrencyLookUpService crossViaCurrencyLookUpService;
 
 	@Autowired
-	private ExchangeRateLoader exchangeRateLoader;
+	private ExchangeRateLoaderService exchangeRateLoaderService;
 
-	private Map<String,List<CurrencyPair>> crossViaCurrencyLookUpMap = null ;
 
-	private  Map<CurrencyPair,String> directionLookUpMap =null;
-
-	private  Map<CurrencyPair,Double> baseTermCurrencyExchangeRateMap =null;
-	
-	private ResourceLoader resourceLoader;
-	
-	@Value("classpath:FXCrossViaLookUp.txt")
-	private Resource res;
-
-	
-	/*@Autowired
-	public FXCalculatorServiceImpl(ResourceLoader resourceLoader){
-		resourceLoader =this.resourceLoader;
-	}*/
-
-	
-	@PostConstruct
-    public void init() throws Exception {
-        try {
-            System.out.println("In post construct.....");
-           /* InputStream inputStream=res.getInputStream();
-            
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder out = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.append(line);
-            }
-            System.out.println(out.toString());   //Prints the string content read from input stream
-            reader.close();*/
-            
-        	List<String> baseTermCurrencyLookUpDetails = Files.readAllLines(Paths.get(res.getURI()),StandardCharsets.UTF_8);
-        	System.out.println("Input number of lines..." + baseTermCurrencyLookUpDetails.size());
-        	char[] termCurrencyArray = new char[]{};
-        	
-        	termCurrencyArray = (baseTermCurrencyLookUpDetails.get(0)).toCharArray() ; 
-        	List<String> termCurrencyList = new ArrayList<>();
-        	for(char eachTermCurr : termCurrencyArray){
-        		termCurrencyList.add(String.valueOf(eachTermCurr));
-        	}
-        	
-        	System.out.println("termCurrencyList first item" + termCurrencyList.get(0));
-        	System.out.println("baseTermCurrencyLookUpDetails first item" + baseTermCurrencyLookUpDetails.get(0));
-        	
-        	for(int i=1;i>baseTermCurrencyLookUpDetails.size();i++){
-        		
-        		
-        	}
-        	
-        	/*for (String line :lines) {
-        		
-                String[] words = line.split("\\s+");
-                System.out.println("One line no of elements" + words.length );
-               for (String word : words) {
-                	System.out.println("word here..." + word);
-                }
-        	}*/
-        } catch (IOException | NullPointerException e) {
-        	
-            System.out.println(" reader cound not be initialized. ");
-            throw e;
-        }
-    }
-
-   /* @PreDestroy
-    public void preDestroy() {
-        if (reader != null) {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                LOGGER.error("Failed to close the reader.");
-            }
-        }
-    }*/
-	
-	
-	
-	
 	@Override
 	public BigDecimal calculateFXAmount(String baseCurrencyCode,
 			BigDecimal baseCurrencyAmount, String termCurrencyCode)
 					throws UnSupportedCurrencyException {
 
+		
+		
 
 		//validateBaseTermCurrencies(baseCurencyCode,termCuurencyCode);
 		//validateBaseCurrencyAmount();
-		crossViaCurrencyLookUpMap = crossCurrencyLookUpLoader.loadCrossCurrencyLookUpMap();
-		directionLookUpMap =crossCurrencyLookUpLoader.loadDirectionLookUpMap();
-		//baseTermCurrencyExchangeRateMap = exchangeRateLoader.loadExchangeRates();
-
+		
 		BigDecimal termCurrencyAmount = new BigDecimal(0.00);
 		boolean sameBaseTermCurrency=checkForSameBaseTermCurrency(baseCurrencyCode,termCurrencyCode);
 
 		if(sameBaseTermCurrency){
 			termCurrencyAmount = baseCurrencyAmount;
 		}else{
+			
+			crossViaCurrencyLookUpService.loadCrossViaCurrencyLookUpFromFile();
+			exchangeRateLoaderService.loadBaseTermCurrencyExchangeRates();
 			termCurrencyAmount=computeFXAmount(baseCurrencyCode, termCurrencyCode, baseCurrencyAmount);
 		}
 
@@ -158,6 +77,13 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 
 	private String fetchCurrencyPairLookUpType(CurrencyPair currencyPair){
 		String lookUpType =null;
+		
+		Map<String,List<CurrencyPair>> crossViaCurrencyLookUpMap = null ;
+        Map<CurrencyPair,String> directionLookUpMap =null;
+		
+		crossViaCurrencyLookUpMap = crossViaCurrencyLookUpService.fetchCrossViaCurrencyLookUpMap();
+		directionLookUpMap =crossViaCurrencyLookUpService.fetchDirectIndirectCurrLookUpMap();
+		
 		if(directionLookUpMap.keySet().contains(currencyPair)){
 			System.out.println("It is a direct or Indirect  look Up");
 			lookUpType = directionLookUpMap.get(currencyPair);
@@ -184,12 +110,13 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 	 */
 	 double computeExchangeRate(String lookUpType,CurrencyPair currencyPair){
 		double exchangeRate = 0.00;
-		
+		Map<CurrencyPair,Double> baseTermCurrencyExchangeRateMap= exchangeRateLoaderService.fetchBaseCurrencyExchangeRateMap();
 		if(lookUpType.equalsIgnoreCase(LookUpType.DIRECT.getValue())){
 			exchangeRate=baseTermCurrencyExchangeRateMap.get(currencyPair);
 		}else if(lookUpType.equalsIgnoreCase(LookUpType.INVERSE.getValue())){
 			exchangeRate =1/(baseTermCurrencyExchangeRateMap.get(new CurrencyPair(currencyPair.getTermCurrKey(), currencyPair.getBaseCurrKey())));
 		}
+		
 		return exchangeRate;
 	}
 

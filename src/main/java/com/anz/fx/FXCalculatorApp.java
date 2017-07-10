@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.io.Resource;
 
 import com.anz.fx.exception.UnSupportedCurrencyException;
+import com.anz.fx.service.CrossViaCurrencyLookUpService;
+import com.anz.fx.service.ExchangeRateLoaderService;
 import com.anz.fx.service.FXCalculatorService;
 
 /**
@@ -22,6 +26,7 @@ public class FXCalculatorApp implements CommandLineRunner {
 
 	@Autowired
 	FXCalculatorService fxCalcService;
+	
 	
 	public static void main(String[] args) throws IOException {
 			SpringApplication.run(FXCalculatorApp.class,args);
@@ -41,11 +46,16 @@ public class FXCalculatorApp implements CommandLineRunner {
 				System.out.println("In:.." + fxCurrencyDetails[2]);
 				System.out.println("Term Currency:.." + fxCurrencyDetails[3]);
 
-				BigDecimal convertedAmount=fxCalcService.calculateFXAmount( fxCurrencyDetails[0],  new BigDecimal(fxCurrencyDetails[1]), fxCurrencyDetails[3]);
+				
+				
+		        BigDecimal convertedAmount=fxCalcService.calculateFXAmount( fxCurrencyDetails[0],  new BigDecimal(fxCurrencyDetails[1]), fxCurrencyDetails[3]);
 				System.out.println("convertedAmount is..." +convertedAmount);
 			}
 
-		} catch (UnSupportedCurrencyException e) {
+		} /*catch (UnSupportedCurrencyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
