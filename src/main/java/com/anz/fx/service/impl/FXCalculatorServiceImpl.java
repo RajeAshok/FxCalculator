@@ -150,6 +150,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 			currencyPairExchangeRate = computeExchangeRate(currencyPairRelation, currencyPair);
 			System.out.println("currPairExchRate.. " + currencyPairExchangeRate);
 			termCurrencyAmount = baseCurrencyAmount.multiply(new BigDecimal(currencyPairExchangeRate));
+			System.out.println("intermediate termCurrencyAmount.." +termCurrencyAmount);
 		} else {
 			currencyPairStack.push(new CurrencyPair(currencyPairRelation,
 					termCurrencyCode));
@@ -173,6 +174,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 
 	 //Utility Method to format the currency based on precision
 	protected BigDecimal formatConvertedAmount(BigDecimal calculatedAmount,Currency termCurrency) {
+		System.out.println("final convertedAmt " + calculatedAmount.setScale(termCurrency.getDefaultFractionDigits(), RoundingMode.UP) );
 		return calculatedAmount.setScale(termCurrency.getDefaultFractionDigits(), RoundingMode.UP);
 	}
 	

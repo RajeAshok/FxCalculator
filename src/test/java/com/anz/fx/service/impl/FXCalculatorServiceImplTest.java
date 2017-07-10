@@ -52,16 +52,36 @@ public class FXCalculatorServiceImplTest {
 		baseTermCurrencyExchangeRateMap.put(new CurrencyPair("AUD", "USD"),0.8371);
 		baseTermCurrencyExchangeRateMap.put(new CurrencyPair("USD", "AUD"),1.1946);
 		baseTermCurrencyExchangeRateMap.put(new CurrencyPair("GBP", "USD"),1.5683);
+		baseTermCurrencyExchangeRateMap.put(new CurrencyPair("EUR", "USD"),1.2315);
+		baseTermCurrencyExchangeRateMap.put(new CurrencyPair("EUR", "NOK"),8.6651);
+		
 		Whitebox.setInternalState(fxCalculatorServiceImpl, "exchangeRateLoaderService", exchangeRateLoaderService);
 		Mockito.when(exchangeRateLoaderService.fetchBaseCurrencyExchangeRateMap()).thenReturn(baseTermCurrencyExchangeRateMap);
 		
 		//loading Direction lookup Map
 		CurrencyPair  usdAud = new CurrencyPair("USD", "AUD");
 		CurrencyPair  audUsd = new CurrencyPair("AUD", "USD");
+		
+		CurrencyPair  gbpUsd = new CurrencyPair("GBP", "USD");
+		CurrencyPair  usdGbp = new CurrencyPair("USD", "GBP");
+		
+		CurrencyPair  eurUsd = new CurrencyPair("EUR", "USD");
+		CurrencyPair  usdEur = new CurrencyPair("USD", "EUR");
+		
+		CurrencyPair  eurNok = new CurrencyPair("EUR", "NOK");
+		CurrencyPair  nokEur = new CurrencyPair("NOK", "EUR");
 
 		Map<CurrencyPair,String> directionLookUpMap=new HashMap<>();
 		directionLookUpMap.put(usdAud,LookUpType.INVERSE.getValue());
 		directionLookUpMap.put(audUsd,LookUpType.DIRECT.getValue());
+		directionLookUpMap.put(usdGbp,LookUpType.INVERSE.getValue());
+		directionLookUpMap.put(gbpUsd,LookUpType.DIRECT.getValue());
+		directionLookUpMap.put(usdEur,LookUpType.INVERSE.getValue());
+		directionLookUpMap.put(eurUsd,LookUpType.DIRECT.getValue());
+		directionLookUpMap.put(nokEur,LookUpType.INVERSE.getValue());
+		directionLookUpMap.put(eurNok,LookUpType.DIRECT.getValue());
+		
+		
 		Whitebox.setInternalState(fxCalculatorServiceImpl, "crossViaCurrencyLookUpService", crossViaCurrencyLookUpService);
 		Mockito.when(crossViaCurrencyLookUpService.fetchDirectIndirectCurrLookUpMap()).thenReturn(directionLookUpMap);
 		
@@ -87,6 +107,7 @@ public class FXCalculatorServiceImplTest {
 		supportedFXCurrenciesList.add("USD");
 		supportedFXCurrenciesList.add("GBP");
 		supportedFXCurrenciesList.add("EUR");
+		supportedFXCurrenciesList.add("NOK");
 		
 		Mockito.when(crossViaCurrencyLookUpService.fetchSupportedFXCurrenciesList()).thenReturn(supportedFXCurrenciesList);
 		
@@ -146,10 +167,18 @@ public class FXCalculatorServiceImplTest {
 		BigDecimal amountToFormat = new BigDecimal(100.4562);
 		String termCurrencyCode ="AUD";
 		Currency termCurrency = Currency.getInstance(termCurrencyCode);
-		assertEquals(100.46,fxCalculatorServiceImpl.formatConvertedAmount(amountToFormat, termCurrency),0.1);
+		assertEquals(100.46, fxCalculatorServiceImpl.formatConvertedAmount(amountToFormat, termCurrency).doubleValue(), 0.1);
 		
 		termCurrencyCode ="JPY";
-		assertEquals(new BigDecimal(100.00),fxCalculatorServiceImpl.formatConvertedAmount(amountToFormat, termCurrency));
+		termCurrency = Currency.getInstance(termCurrencyCode);
+		assertEquals(101,fxCalculatorServiceImpl.formatConvertedAmount(amountToFormat, termCurrency).doubleValue(),0.1);
 		
+	}
+	
+	@Test
+	public void computeFXAmountTest() throws FXDetailValidationException, UnSupportedCurrencyException{
+		
+		assertEquals(83.71,fxCalculatorServiceImpl.calculateFXAmount("AUD", "100.00", "USD").doubleValue(),0.1);
+		assertEquals(110.35,fxCalculatorServiceImpl.calculateFXAmount("GBP", "10.00", "NOK").doubleValue(),0.1);
 	}
 }
