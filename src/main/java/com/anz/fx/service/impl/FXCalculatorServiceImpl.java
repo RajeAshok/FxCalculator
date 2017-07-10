@@ -13,6 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.anz.fx.exception.FXDetailValidationException;
 import com.anz.fx.exception.UnSupportedCurrencyException;
 import com.anz.fx.model.CurrencyPair;
 import com.anz.fx.model.LookUpType;
@@ -31,32 +32,30 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 	@Autowired
 	private ExchangeRateLoaderService exchangeRateLoaderService;
 
-
 	@Override
 	public BigDecimal calculateFXAmount(String baseCurrencyCode,
-			BigDecimal baseCurrencyAmount, String termCurrencyCode)
-					throws UnSupportedCurrencyException {
+			String baseCurrencyAmountString, String termCurrencyCode) throws FXDetailValidationException, UnSupportedCurrencyException {
 
-		
-		
+		crossViaCurrencyLookUpService.loadCrossViaCurrencyLookUpFromFile();
+		exchangeRateLoaderService.loadBaseTermCurrencyExchangeRates();
+		validateBaseTermCurrencies(baseCurrencyCode,termCurrencyCode);
+		BigDecimal baseCurrencyAmount = new BigDecimal(0.00);
+		 baseCurrencyAmount=validateBaseCurrencyAmount(baseCurrencyAmountString);
 
-		//validateBaseTermCurrencies(baseCurencyCode,termCuurencyCode);
-		//validateBaseCurrencyAmount();
-		
 		BigDecimal termCurrencyAmount = new BigDecimal(0.00);
-		boolean sameBaseTermCurrency=checkForSameBaseTermCurrency(baseCurrencyCode,termCurrencyCode);
+		boolean sameBaseTermCurrency = checkForSameBaseTermCurrency(
+				baseCurrencyCode, termCurrencyCode);
 
-		if(sameBaseTermCurrency){
+		if (sameBaseTermCurrency) {
 			termCurrencyAmount = baseCurrencyAmount;
-		}else{
-			
-			crossViaCurrencyLookUpService.loadCrossViaCurrencyLookUpFromFile();
-			exchangeRateLoaderService.loadBaseTermCurrencyExchangeRates();
-			termCurrencyAmount=computeFXAmount(baseCurrencyCode, termCurrencyCode, baseCurrencyAmount);
+		} else {
+			termCurrencyAmount = computeFXAmount(baseCurrencyCode,
+					termCurrencyCode, baseCurrencyAmount);
 		}
 
-		termCurrencyAmount =formatConvertedAmount(termCurrencyAmount, Currency.getInstance(termCurrencyCode));
-		System.out.println("termCurrencyAmount.." +termCurrencyAmount);
+		termCurrencyAmount = formatConvertedAmount(termCurrencyAmount,
+				Currency.getInstance(termCurrencyCode));
+		System.out.println("termCurrencyAmount.." + termCurrencyAmount);
 		return termCurrencyAmount;
 	}
 
@@ -66,101 +65,186 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 	 * @param termCurrencyCode
 	 * @return
 	 */
-	 boolean checkForSameBaseTermCurrency(String baseCurrencyCode,String termCurrencyCode){
-		if(baseCurrencyCode.equalsIgnoreCase(termCurrencyCode)){
+	boolean checkForSameBaseTermCurrency(String baseCurrencyCode,
+			String termCurrencyCode) {
+		if (baseCurrencyCode.equalsIgnoreCase(termCurrencyCode)) {
 			return true;
-		}else{
+		} else {
 			return false;
-		}		
+		}
 	}
+	
+	private String fetchCurrencyPairLookUpType(CurrencyPair currencyPair) {
+		String lookUpType = null;
 
+		Map<String, List<CurrencyPair>> crossViaCurrencyLookUpMap = null;
+		Map<CurrencyPair, String> directionLookUpMap = null;
 
-	private String fetchCurrencyPairLookUpType(CurrencyPair currencyPair){
-		String lookUpType =null;
-		
-		Map<String,List<CurrencyPair>> crossViaCurrencyLookUpMap = null ;
-        Map<CurrencyPair,String> directionLookUpMap =null;
-		
-		crossViaCurrencyLookUpMap = crossViaCurrencyLookUpService.fetchCrossViaCurrencyLookUpMap();
-		directionLookUpMap =crossViaCurrencyLookUpService.fetchDirectIndirectCurrLookUpMap();
-		
-		if(directionLookUpMap.keySet().contains(currencyPair)){
+		crossViaCurrencyLookUpMap = crossViaCurrencyLookUpService
+				.fetchCrossViaCurrencyLookUpMap();
+		directionLookUpMap = crossViaCurrencyLookUpService
+				.fetchDirectIndirectCurrLookUpMap();
+
+		if (directionLookUpMap.keySet().contains(currencyPair)) {
 			System.out.println("It is a direct or Indirect  look Up");
 			lookUpType = directionLookUpMap.get(currencyPair);
 
-		}else{
+		} else {
 			System.out.println("Involves Via curr");
-			for(Map.Entry entry:crossViaCurrencyLookUpMap.entrySet()){
-				List<CurrencyPair> crossCurrencyList = (List<CurrencyPair>)entry.getValue();
-				if(crossCurrencyList.contains(currencyPair)){
-					lookUpType= entry.getKey().toString();
+			for (Map.Entry entry : crossViaCurrencyLookUpMap.entrySet()) {
+				List<CurrencyPair> crossCurrencyList = (List<CurrencyPair>) entry.getValue();
+				if (crossCurrencyList.contains(currencyPair)) {
+					lookUpType = entry.getKey().toString();
 				}
 			}
 		}
-		System.out.println("lookUpType returned.." +lookUpType);
+		System.out.println("lookUpType returned.." + lookUpType);
 		return lookUpType;
 	}
 
 	/**
-	 * Compute exchange rate based on the loaded Map with Currency Pair and exchange rate details
-	 * for certain currencyPairs with INVERSE relation , need to look up with proper order of Currencies in CurrencyPair object
+	 * Compute exchange rate based on the loaded Map with Currency Pair and
+	 * exchange rate details for certain currencyPairs with INVERSE relation ,
+	 * need to look up with proper order of Currencies in CurrencyPair object
+	 * 
 	 * @param lookUpType
 	 * @param currencyPair
 	 * @return
 	 */
-	 double computeExchangeRate(String lookUpType,CurrencyPair currencyPair){
+	double computeExchangeRate(String lookUpType, CurrencyPair currencyPair) {
 		double exchangeRate = 0.00;
-		Map<CurrencyPair,Double> baseTermCurrencyExchangeRateMap= exchangeRateLoaderService.fetchBaseCurrencyExchangeRateMap();
-		if(lookUpType.equalsIgnoreCase(LookUpType.DIRECT.getValue())){
-			exchangeRate=baseTermCurrencyExchangeRateMap.get(currencyPair);
-		}else if(lookUpType.equalsIgnoreCase(LookUpType.INVERSE.getValue())){
-			exchangeRate =1/(baseTermCurrencyExchangeRateMap.get(new CurrencyPair(currencyPair.getTermCurrKey(), currencyPair.getBaseCurrKey())));
+		Map<CurrencyPair, Double> baseTermCurrencyExchangeRateMap = exchangeRateLoaderService
+				.fetchBaseCurrencyExchangeRateMap();
+		if (lookUpType.equalsIgnoreCase(LookUpType.DIRECT.getValue())) {
+			exchangeRate = baseTermCurrencyExchangeRateMap.get(currencyPair);
+		} else if (lookUpType.equalsIgnoreCase(LookUpType.INVERSE.getValue())) {
+			exchangeRate = 1 / (baseTermCurrencyExchangeRateMap
+					.get(new CurrencyPair(currencyPair.getTermCurrKey(),
+							currencyPair.getBaseCurrKey())));
 		}
-		
+
 		return exchangeRate;
 	}
 
 	/**
-	 * Calculate the Amount in the term currency provided as input using exchange rate 
-	 * Used this formula to calculate the converted amount:  "termCurrencyAmount = baseCurrencyAmount * exchange rate for that BASE/TERM
-	 * performed recursion as the currency look up involves cross via look ups other than direct and Indirect
+	 * Calculate the Amount in the term currency provided as input using
+	 * exchange rate Used this formula to calculate the converted amount:
+	 * "termCurrencyAmount = baseCurrencyAmount * exchange rate for that
+	 * BASE/TERM performed recursion as the currency look up involves cross via
+	 * look ups other than direct and Indirect
+	 * 
 	 * @param baseCurrencyCode
 	 * @param termCurrencyCode
 	 * @param baseCurrencyAmount
 	 * @return
 	 */
-	private BigDecimal computeFXAmount(String baseCurrencyCode, String termCurrencyCode,BigDecimal baseCurrencyAmount){
+	private BigDecimal computeFXAmount(String baseCurrencyCode,
+			String termCurrencyCode, BigDecimal baseCurrencyAmount) {
 
-		CurrencyPair  currencyPair = new CurrencyPair(baseCurrencyCode, termCurrencyCode);
+		CurrencyPair currencyPair = new CurrencyPair(baseCurrencyCode,
+				termCurrencyCode);
 		String currencyPairRelation = fetchCurrencyPairLookUpType(currencyPair);
-		double currencyPairExchangeRate= 0.00;
-		Stack<CurrencyPair> currencyPairStack =new Stack<>();
-		BigDecimal termCurrencyAmount =baseCurrencyAmount;
-		if(currencyPairRelation.equalsIgnoreCase(LookUpType.DIRECT.getValue() )||
-				currencyPairRelation.equalsIgnoreCase(LookUpType.INVERSE.getValue() )   ){
+		double currencyPairExchangeRate = 0.00;
+		Stack<CurrencyPair> currencyPairStack = new Stack<>();
+		BigDecimal termCurrencyAmount = baseCurrencyAmount;
+		if (currencyPairRelation.equalsIgnoreCase(LookUpType.DIRECT.getValue())
+				|| currencyPairRelation.equalsIgnoreCase(LookUpType.INVERSE
+						.getValue())) {
 			System.out.println("Computing Amount for Direct/Indirect relation");
-			currencyPairExchangeRate =computeExchangeRate(currencyPairRelation,currencyPair);
-			System.out.println("currPairExchRate.. " + currencyPairExchangeRate);
-			termCurrencyAmount = baseCurrencyAmount.multiply(new BigDecimal(currencyPairExchangeRate));
+			currencyPairExchangeRate = computeExchangeRate(
+					currencyPairRelation, currencyPair);
+			System.out
+			.println("currPairExchRate.. " + currencyPairExchangeRate);
+			termCurrencyAmount = baseCurrencyAmount.multiply(new BigDecimal(
+					currencyPairExchangeRate));
 
-		}else{
-			currencyPairStack.push(new CurrencyPair(currencyPairRelation, termCurrencyCode));
-			currencyPairStack.push(new CurrencyPair(baseCurrencyCode, currencyPairRelation));
+		} else {
+			currencyPairStack.push(new CurrencyPair(currencyPairRelation,
+					termCurrencyCode));
+			currencyPairStack.push(new CurrencyPair(baseCurrencyCode,
+					currencyPairRelation));
 
 			do {
 				CurrencyPair currentCurrencyPair = currencyPairStack.pop();
-				System.out.println("currentCurrencyPair.getBaseCurrKey().." + currentCurrencyPair.getBaseCurrKey());
-				System.out.println("currentCurrencyPair.getTermCurrKey().." + currentCurrencyPair.getTermCurrKey());
-				termCurrencyAmount = computeFXAmount(currentCurrencyPair.getBaseCurrKey(),currentCurrencyPair.getTermCurrKey(), termCurrencyAmount);
+				System.out.println("currentCurrencyPair.getBaseCurrKey().."
+						+ currentCurrencyPair.getBaseCurrKey());
+				System.out.println("currentCurrencyPair.getTermCurrKey().."
+						+ currentCurrencyPair.getTermCurrKey());
+				termCurrencyAmount = computeFXAmount(
+						currentCurrencyPair.getBaseCurrKey(),
+						currentCurrencyPair.getTermCurrKey(),
+						termCurrencyAmount);
 			} while (!currencyPairStack.isEmpty());
 
 		}
 		return termCurrencyAmount;
 	}
 
-	private BigDecimal formatConvertedAmount(BigDecimal calculatedAmount, Currency termCurrency){
-		return calculatedAmount.setScale(termCurrency.getDefaultFractionDigits(), RoundingMode.UP);
+	 //Utility Methods
+	private BigDecimal formatConvertedAmount(BigDecimal calculatedAmount,
+			Currency termCurrency) {
+		return calculatedAmount.setScale(
+				termCurrency.getDefaultFractionDigits(), RoundingMode.UP);
 
+	}
+	
+  
+public void validateBaseTermCurrencies(String baseCurrencyCode,String termCurrencyCode) throws FXDetailValidationException, UnSupportedCurrencyException{
+		
+		String validationMessage ="";
+		if(baseCurrencyCode!=null && !baseCurrencyCode.isEmpty()){
+			//base currency not empty
+		}else{
+			validationMessage+="Validation Error.Base Currency Code cannot be empty .Please enter a value. ";
+		}
+		if(termCurrencyCode!=null && !termCurrencyCode.isEmpty()){
+		 //term currency not empty 
+		}
+		else{
+			validationMessage+="Term Currency Code cannot be empty .Please enter a value. ";
+		}
+		
+		if(validationMessage.length()> 0){
+			String displayErrorMessage="Validation Error.";
+			displayErrorMessage=displayErrorMessage.concat(validationMessage);
+			throw new FXDetailValidationException(displayErrorMessage);
+		}else{
+			checkIfBaseTermCurrencyIsSupported(baseCurrencyCode,termCurrencyCode);
+		}
+		
+	}
+
+	private void checkIfBaseTermCurrencyIsSupported(String baseCurrencyCode,String termCurrencyCode) throws UnSupportedCurrencyException {
+		List<String> supportedFXCurrenciesList = crossViaCurrencyLookUpService
+				.fetchSupportedFXCurrenciesList();
+
+		String unSupportedErrorMessage ="";
+		if (!supportedFXCurrenciesList.contains(baseCurrencyCode)) {
+		
+			unSupportedErrorMessage += "Base Currency Code provided is not supported .Please enter a valid Base Currency Code. ";
+		}
+		if (!supportedFXCurrenciesList.contains(termCurrencyCode)) {
+			unSupportedErrorMessage += "Term Currency Code provided is not supported .Please enter a valid Term Currency Code. ";
+		}
+		
+		if(unSupportedErrorMessage.length()>0){
+			String displayErrorMessage = "Unable to find rate for " + baseCurrencyCode +"/" + termCurrencyCode + "." ;
+			displayErrorMessage=displayErrorMessage.concat(unSupportedErrorMessage);
+			throw new UnSupportedCurrencyException(displayErrorMessage);
+		}
+	}
+	
+	private BigDecimal validateBaseCurrencyAmount(String baseCurrAmount) throws FXDetailValidationException{
+		
+		
+		BigDecimal baseCurrencyAmount = new BigDecimal(0.00);
+		try{
+			baseCurrencyAmount = new BigDecimal(baseCurrAmount);
+		}catch(NumberFormatException ne){
+			String errorMessage ="Error Occured. Enter a valid number in Amount field";
+			throw new FXDetailValidationException(errorMessage);
+		}
+		return baseCurrencyAmount;
 	}
 
 }

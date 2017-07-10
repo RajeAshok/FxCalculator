@@ -4,19 +4,17 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.core.io.Resource;
 
+import com.anz.fx.exception.FXDetailValidationException;
 import com.anz.fx.exception.UnSupportedCurrencyException;
-import com.anz.fx.service.CrossViaCurrencyLookUpService;
-import com.anz.fx.service.ExchangeRateLoaderService;
 import com.anz.fx.service.FXCalculatorService;
 
 /**
- * FX Calculator App 
+ * FX Calculator App : Calculates the foreign exchange Amount : 
+ * Input should be Base Currency code  ,Amount in Base Currency and Term Currency Code
  * @author AshRaje
  *
  */
@@ -33,35 +31,36 @@ public class FXCalculatorApp implements CommandLineRunner {
 	}
 
 	@Override
-	public void run(String... args) throws Exception {
-		try {
-			System.out.println("Please enter Below Details in following format");
+	public void run(String... args){
+		
+			System.out.println("Please enter below Details in following format");
 			System.out.println("<Base Currency Code> <Amount to be converted> in <Term CurrencyCode>");
 			String[] fxCurrencyDetails = args;
-			System.out.println("n run method.." + fxCurrencyDetails);
-			if(fxCurrencyDetails != null && fxCurrencyDetails.length >0 ){
+			String baseCurrencyCode="";
+			String termCurrencyCode ="";
+			String baseCurrencyAmount ="";
+			if(fxCurrencyDetails != null && fxCurrencyDetails.length > 0 ){
+				if(fxCurrencyDetails.length != 4){
+					String validationErrorMesssage = "Please enter details in correct format : <BaseCurrencyCode> <BaseCurrencyAmount> in <TermcurrencyCode>";
+					try {
+						throw new FXDetailValidationException(validationErrorMesssage);
+					} catch (FXDetailValidationException e) {
+						System.out.println(e.getMessage());
+					}
+				}
+				baseCurrencyCode=fxCurrencyDetails[0];
+				baseCurrencyAmount= fxCurrencyDetails[1];
+				termCurrencyCode= fxCurrencyDetails[3];
+		        BigDecimal convertedAmount = new BigDecimal(0.00);
+				try {
+					convertedAmount = fxCalcService.calculateFXAmount(baseCurrencyCode, baseCurrencyAmount, termCurrencyCode);
+				} catch (UnSupportedCurrencyException | FXDetailValidationException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e.getMessage());
+				}
 				
-				System.out.println("Base Curr: " + fxCurrencyDetails[0]);
-				System.out.println("Base Amount to be converted: " + fxCurrencyDetails[1]);
-				System.out.println("In:.." + fxCurrencyDetails[2]);
-				System.out.println("Term Currency:.." + fxCurrencyDetails[3]);
-
-				
-				
-		        BigDecimal convertedAmount=fxCalcService.calculateFXAmount( fxCurrencyDetails[0],  new BigDecimal(fxCurrencyDetails[1]), fxCurrencyDetails[3]);
-				System.out.println("convertedAmount is..." +convertedAmount);
 			}
-
-		} /*catch (UnSupportedCurrencyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
-
 
 
 }

@@ -27,7 +27,7 @@ public class CrossViaCurrencyLookUpServiceImpl implements
    
    private Map<String,List<CurrencyPair>> crossViaCurrencyLookUpMap = new HashMap<>();
    
-   private List<Currency> supportedFXCurrenciesList = new ArrayList<>();
+   private List<String> supportedFXCurrenciesList = new ArrayList<>();
 	 
 	
    @Value("classpath:FXCrossViaLookUp.txt")
@@ -60,7 +60,7 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 				String[] baseCurrencyLookUpTypeElements = baseCurrencyLookUpString.split("\\s+");
 				List<String> baseCurrencyLookUpTypeList = new ArrayList<String>(Arrays.asList(baseCurrencyLookUpTypeElements));
 				String baseCurrencyKey = baseCurrencyLookUpTypeList.get(0);
-				supportedFXCurrenciesList.add(Currency.getInstance(baseCurrencyKey));
+				supportedFXCurrenciesList.add(baseCurrencyKey);
 				for(int j=1;j< baseCurrencyLookUpTypeList.size() ;j++){
 					String termCurrencyKey =termCurrencyList.get(j);
 					CurrencyPair baseTermCurrencyPair = new CurrencyPair(baseCurrencyKey,termCurrencyKey);
@@ -99,12 +99,6 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 
 	}
 	
-	
-	@Override
-	public List<Currency> fetchSupportedFXCurrenciesList() {
-		return this.getSupportedFXCurrenciesList();
-	}
-
 	@Override
 	public Map<CurrencyPair, String> fetchDirectIndirectCurrLookUpMap() {
 		return this.getDirectIndirectCurrLookUpMap();
@@ -133,15 +127,18 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 		this.crossViaCurrencyLookUpMap = crossViaCurrencyLookUpMap;
 	}
 
-	public void setSupportedFXCurrenciesList(
-			List<Currency> supportedFXCurrenciesList) {
-		this.supportedFXCurrenciesList = supportedFXCurrenciesList;
-	}
-
-	public List<Currency> getSupportedFXCurrenciesList() {
+	public List<String> getSupportedFXCurrenciesList() {
 		return supportedFXCurrenciesList;
 	}
 
-	
+	public void setSupportedFXCurrenciesList(List<String> supportedFXCurrenciesList) {
+		this.supportedFXCurrenciesList = supportedFXCurrenciesList;
+	}
+
+	@Override
+	public List<String> fetchSupportedFXCurrenciesList() {
+		// TODO Auto-generated method stub
+		return getSupportedFXCurrenciesList();
+	}
 
 }

@@ -24,6 +24,12 @@ public class Localtesting {
     = new HashMap<>();
 	
 	public static void main(String[] args) {
+		
+		String myNum ="-105";
+		BigDecimal myNumB = new BigDecimal(myNum);
+		myNumB.setScale(2);
+		System.out.println("myNumB..." +  myNumB);
+		System.out.println(myNumB.scale());
 		CurrencyPair  usdAud = new CurrencyPair("USD", "AUD");
 		CurrencyPair  usdCad = new CurrencyPair("USD", "CAD");
 		CurrencyPair  usdCny = new CurrencyPair("USD", "CNY");
