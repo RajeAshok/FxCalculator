@@ -2,11 +2,14 @@ package com.anz.fx.service.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -25,6 +28,10 @@ import com.anz.fx.util.ExchangeRateLoader;
 
 @Service
 public class FXCalculatorServiceImpl implements FXCalculatorService {
+	
+	static final Logger LOG = LoggerFactory.getLogger(FXCalculatorServiceImpl.class);
+	
+	
 
 	@Autowired
 	private CrossViaCurrencyLookUpService crossViaCurrencyLookUpService;
@@ -33,13 +40,14 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 	private ExchangeRateLoaderService exchangeRateLoaderService;
 
 	@Override
-	public BigDecimal calculateFXAmount(String baseCurrencyCode,
+	public String computeFXConversion(String baseCurrencyCode,
 			String baseCurrencyAmountString, String termCurrencyCode) throws FXDetailValidationException, UnSupportedCurrencyException {
 
 		crossViaCurrencyLookUpService.loadCrossViaCurrencyLookUpFromFile();
 		exchangeRateLoaderService.loadBaseTermCurrencyExchangeRates();
 		validateBaseTermCurrencies(baseCurrencyCode,termCurrencyCode);
 		BigDecimal baseCurrencyAmount = new BigDecimal(0.00);
+		
 		baseCurrencyAmount=validateBaseCurrencyAmount(baseCurrencyAmountString);
 
 		BigDecimal termCurrencyAmount = new BigDecimal(0.00);
@@ -49,12 +57,13 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 		if (sameBaseTermCurrency) {
 			termCurrencyAmount = baseCurrencyAmount;
 		} else {
-			termCurrencyAmount = computeFXAmount(baseCurrencyCode,termCurrencyCode, baseCurrencyAmount);
+			termCurrencyAmount = calculateFXAmount(baseCurrencyCode,termCurrencyCode, baseCurrencyAmount);
 		}
 
+		baseCurrencyAmount=formatConvertedAmount(baseCurrencyAmount,Currency.getInstance(baseCurrencyCode));
 		termCurrencyAmount = formatConvertedAmount(termCurrencyAmount,Currency.getInstance(termCurrencyCode));
-		System.out.println("termCurrencyAmount.." + termCurrencyAmount);
-		return termCurrencyAmount;
+		String displayResponseMessage = displayResponseMessage(baseCurrencyCode,termCurrencyCode,baseCurrencyAmount,termCurrencyAmount);
+		return displayResponseMessage;
 	}
 
 	/**
@@ -135,7 +144,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 	 * @param baseCurrencyAmount
 	 * @return
 	 */
-	protected BigDecimal computeFXAmount(String baseCurrencyCode,
+	protected BigDecimal calculateFXAmount(String baseCurrencyCode,
 			String termCurrencyCode, BigDecimal baseCurrencyAmount) {
 
 		CurrencyPair currencyPair = new CurrencyPair(baseCurrencyCode,
@@ -163,7 +172,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 						+ currentCurrencyPair.getBaseCurrKey());
 				System.out.println("currentCurrencyPair.getTermCurrKey().."
 						+ currentCurrencyPair.getTermCurrKey());
-				termCurrencyAmount = computeFXAmount(
+				termCurrencyAmount = calculateFXAmount(
 						currentCurrencyPair.getBaseCurrKey(),
 						currentCurrencyPair.getTermCurrKey(),
 						termCurrencyAmount);
@@ -195,15 +204,30 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 		checkIfBaseTermCurrencyIsSupported(baseCurrencyCode,termCurrencyCode);	
 	}
 
-	protected void checkIfBaseTermCurrencyIsSupported(String baseCurrencyCode,String termCurrencyCode) throws UnSupportedCurrencyException {
-		List<String> supportedFXCurrenciesList = crossViaCurrencyLookUpService.fetchSupportedFXCurrenciesList();
+	protected void checkIfBaseTermCurrencyIsSupported(String baseCurrencyCode,String termCurrencyCode) throws UnSupportedCurrencyException, FXDetailValidationException {
+		List<Currency> supportedFXCurrenciesList = crossViaCurrencyLookUpService.fetchSupportedFXCurrenciesList();
 
 		StringBuilder displayErrorMessage = new StringBuilder("Unable to find rate for " + baseCurrencyCode +"/" + termCurrencyCode + ".") ;
-		if (!supportedFXCurrenciesList.contains(baseCurrencyCode)) {
+		Currency baseCurrency;
+		Currency termCurrency ;
+		try{
+			baseCurrency=Currency.getInstance(baseCurrencyCode);
+		}catch(IllegalArgumentException illegalArgumentException){
+			displayErrorMessage.append("Base currency code provided is not a valid ISO 4217 currency code .Please enter a valid Base currency code. ");
+			throw new FXDetailValidationException(displayErrorMessage.toString());
+		}
+		try{
+			termCurrency=Currency.getInstance(termCurrencyCode);
+		}catch(IllegalArgumentException illegalArgumentException){
+			displayErrorMessage.append("Term currency code provided is not a valid ISO 4217 currency code .Please enter a valid Term currency code. ");
+			throw new FXDetailValidationException(displayErrorMessage.toString());
+		}
+		
+		if (!supportedFXCurrenciesList.contains(baseCurrency)) {
 			displayErrorMessage.append("Base Currency Code provided is not supported .Please enter a valid Base Currency Code. ");
 			throw new UnSupportedCurrencyException(displayErrorMessage.toString());
 		}
-		if (!supportedFXCurrenciesList.contains(termCurrencyCode)) {
+		if (!supportedFXCurrenciesList.contains(termCurrency)) {
 			displayErrorMessage.append("Term Currency Code provided is not supported .Please enter a valid Term Currency Code. ");
 			throw new UnSupportedCurrencyException(displayErrorMessage.toString());
 		}
@@ -220,6 +244,16 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 			throw new FXDetailValidationException(errorMessage);
 		}
 		return baseCurrencyAmount;
+	}
+	
+	protected String displayResponseMessage(String baseCurrencyCode, String termCurrencyCode, BigDecimal baseCurrencyAmount, BigDecimal termCurrencyAmount){
+		StringBuilder displayFXConversionResponse =new StringBuilder(60);
+		DecimalFormat df = new DecimalFormat("0.00");
+		displayFXConversionResponse.append(baseCurrencyCode).append(" ").append(baseCurrencyAmount).append(" ");
+		displayFXConversionResponse.append("=").append(" ").append(termCurrencyCode).append(" ").append(termCurrencyAmount);
+		
+		System.out.println("displayFXConversionResponse.." +displayFXConversionResponse.toString());
+		return displayFXConversionResponse.toString();
 	}
 
 }

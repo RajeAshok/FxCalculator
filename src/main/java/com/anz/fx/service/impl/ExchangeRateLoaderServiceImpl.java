@@ -1,11 +1,8 @@
 package com.anz.fx.service.impl;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import com.anz.fx.exception.FXDetailValidationException;
 import com.anz.fx.model.CurrencyPair;
 import com.anz.fx.service.ExchangeRateLoaderService;
 
@@ -23,14 +21,20 @@ public class ExchangeRateLoaderServiceImpl implements ExchangeRateLoaderService 
 	 private Map<CurrencyPair,Double> baseTermCurrencyExchangeRateMap =new HashMap<>();
 	 
 	 @Value("classpath:BaseTermCurrencyExchangeRates.txt")
-		private  Resource exchangeRateLookUpResource;
+	 private  Resource exchangeRateLookUpResource;
 	
 	@Override
-	public void loadBaseTermCurrencyExchangeRates() {
+	public void loadBaseTermCurrencyExchangeRates() throws FXDetailValidationException {
 		
-		try{
-		List<String> baseTermCurrencyExchangRateLookUpDetails = Files.readAllLines(
-				Paths.get(exchangeRateLookUpResource.getURI()), StandardCharsets.UTF_8);
+		
+		List<String> baseTermCurrencyExchangRateLookUpDetails =null;
+		try {
+			baseTermCurrencyExchangRateLookUpDetails = Files.readAllLines(Paths.get(exchangeRateLookUpResource.getURI()), StandardCharsets.UTF_8);
+			System.out.println("Paths.get(exchangeRateLookUpResource.getURI().." +exchangeRateLookUpResource.getURI());
+			//System.out.println("Pathss.. " +Paths.get(exchangeRateLookUpResource.getURI()), StandardCharsets.UTF_8));
+		} catch (Exception e) {
+			throw new FXDetailValidationException("Error Reading the input File: " + e.getMessage());
+		}
 		System.out.println("baseTermCurrencyExchangRateLookUpDetails.size().." + baseTermCurrencyExchangRateLookUpDetails.size());
 		for (int i = 0; i < baseTermCurrencyExchangRateLookUpDetails.size(); i++) {
 			String baseTermCurrencyExchRateString =baseTermCurrencyExchangRateLookUpDetails.get(i);
@@ -47,9 +51,7 @@ public class ExchangeRateLoaderServiceImpl implements ExchangeRateLoaderService 
 		
 		}		
 		setBaseTermCurrencyExchangeRateMap(baseTermCurrencyExchangeRateMap);
-		}catch(IOException ex){
-			System.out.println("IOEXception ");
-		}
+		
 	}
 
 	@Override

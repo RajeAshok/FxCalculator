@@ -2,6 +2,7 @@ package com.anz.fx.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashMap;
@@ -25,10 +26,35 @@ public class Localtesting {
 	
 	public static void main(String[] args) {
 		
-		String myNum ="-105";
+		System.out.println("currencies.. \n " + Currency.getAvailableCurrencies());
+	//	Currency.getAvailableCurrencies().forEach(currency -> System.out.println(currency + "\n"));
+		String[] argString = new String[]{"AUD 100 in JPY"};
+		String fxCurrencyDetailsString = argString[0]; 
+		String[] fxCurrencyDetails = fxCurrencyDetailsString.split(" ");
+		System.out.println("fxCurrencyDetails[0]" + fxCurrencyDetails[0]);
+     StringBuilder displayFXConversionResponse =new StringBuilder(60);
+     DecimalFormat df = new DecimalFormat("0.00");
+     System.out.println("" + df.format(new BigDecimal(10.00)));
+     System.out.println("" + df.format(new BigDecimal(11)));
+     
+     System.out.println("doble"+ new BigDecimal(10.00).doubleValue());
+     BigDecimal baseCurrency1 = new BigDecimal(10.10555);
+     BigDecimal termCurrency1 = new BigDecimal(11.556666);
+     baseCurrency1.setScale(2,RoundingMode.UP);
+     termCurrency1.setScale(3,RoundingMode.UP);
+     System.out.println("JPY "+ baseCurrency1 +"= " + "USD " + termCurrency1 );
+     
+		//displayFXConversionResponse.append("USD").append(" ").append(new BigDecimal(10.00)).append(" ");
+		//displayFXConversionResponse.append("=").append(" ").append("AUD").append(" ").append(new BigDecimal(11.95));
+		
+		System.out.println("displayFXConversionResponse.." +displayFXConversionResponse.toString());
+		//return displayFXConversionResponse.toString();
+		
+		Currency.getInstance("AUD");
+		String myNum ="11.22";
 		BigDecimal myNumB = new BigDecimal(myNum);
 		myNumB.setScale(2);
-		System.out.println("myNumB..." +  myNumB);
+		System.out.println("myNumB..." +  myNumB.toString());
 		System.out.println(myNumB.scale());
 		CurrencyPair  usdAud = new CurrencyPair("USD", "AUD");
 		CurrencyPair  usdCad = new CurrencyPair("USD", "CAD");

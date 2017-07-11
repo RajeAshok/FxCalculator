@@ -27,7 +27,7 @@ public class CrossViaCurrencyLookUpServiceImpl implements
    
    private Map<String,List<CurrencyPair>> crossViaCurrencyLookUpMap = new HashMap<>();
    
-   private List<String> supportedFXCurrenciesList = new ArrayList<>();
+   private List<Currency> supportedFXCurrenciesList = new ArrayList<>();
 	 
 	
    @Value("classpath:FXCrossViaLookUp.txt")
@@ -60,13 +60,12 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 				String[] baseCurrencyLookUpTypeElements = baseCurrencyLookUpString.split("\\s+");
 				List<String> baseCurrencyLookUpTypeList = new ArrayList<String>(Arrays.asList(baseCurrencyLookUpTypeElements));
 				String baseCurrencyKey = baseCurrencyLookUpTypeList.get(0);
-				supportedFXCurrenciesList.add(baseCurrencyKey);
+				supportedFXCurrenciesList.add(Currency.getInstance(baseCurrencyKey));
 				for(int j=1;j< baseCurrencyLookUpTypeList.size() ;j++){
 					String termCurrencyKey =termCurrencyList.get(j);
 					CurrencyPair baseTermCurrencyPair = new CurrencyPair(baseCurrencyKey,termCurrencyKey);
 					String baseCurrencyLookUptype = baseCurrencyLookUpTypeList.get(j);
 				    if(baseCurrencyLookUptype.equalsIgnoreCase("D") ){
-				    	
 				    	directIndirectCurrLookUpMap.put(baseTermCurrencyPair, LookUpType.DIRECT.getValue());
 				    	baseTermCurrencyPair= new CurrencyPair(termCurrencyKey, baseCurrencyKey);
 				    	directIndirectCurrLookUpMap.put(baseTermCurrencyPair, LookUpType.INVERSE.getValue());
@@ -81,10 +80,10 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 				    }
 				}
 			}
-			System.out.println("viaEURCurrencyPairList.." +viaEURCurrencyPairList.size());
-			System.out.println("viaUSDCurrencyPairList.." +viaUSDCurrencyPairList.size());
-			viaUSDCurrencyPairList.forEach((CurrencyPair) -> System.out.println("usdList item --> "+ CurrencyPair.getBaseCurrKey() + ":"+ CurrencyPair.getTermCurrKey() ));
-			System.out.println("directIndirectCurrLookUpMap.." +directIndirectCurrLookUpMap.size());
+			///System.out.println("viaEURCurrencyPairList.." +viaEURCurrencyPairList.size());
+			//System.out.println("viaUSDCurrencyPairList.." +viaUSDCurrencyPairList.size());
+		//	viaUSDCurrencyPairList.forEach((CurrencyPair) -> System.out.println("usdList item --> "+ CurrencyPair.getBaseCurrKey() + ":"+ CurrencyPair.getTermCurrKey() ));
+			//System.out.println("directIndirectCurrLookUpMap.." +directIndirectCurrLookUpMap.size());
 			setSupportedFXCurrenciesList(supportedFXCurrenciesList);
 			System.out.println("supportedFXCurrenciesList.." +supportedFXCurrenciesList.size());
 			this.setDirectIndirectCurrLookUpMap(directIndirectCurrLookUpMap);
@@ -127,18 +126,19 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 		this.crossViaCurrencyLookUpMap = crossViaCurrencyLookUpMap;
 	}
 
-	public List<String> getSupportedFXCurrenciesList() {
+	public List<Currency> getSupportedFXCurrenciesList() {
 		return supportedFXCurrenciesList;
 	}
 
-	public void setSupportedFXCurrenciesList(List<String> supportedFXCurrenciesList) {
-		this.supportedFXCurrenciesList = supportedFXCurrenciesList;
-	}
-
 	@Override
-	public List<String> fetchSupportedFXCurrenciesList() {
+	public List<Currency> fetchSupportedFXCurrenciesList() {
 		// TODO Auto-generated method stub
 		return getSupportedFXCurrenciesList();
+	}
+
+	public void setSupportedFXCurrenciesList(
+			List<Currency> supportedFXCurrenciesList) {
+		this.supportedFXCurrenciesList = supportedFXCurrenciesList;
 	}
 
 }

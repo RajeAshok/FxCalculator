@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashMap;
@@ -37,10 +38,7 @@ public class FXCalculatorServiceImplTest {
 	@Mock
 	private ExchangeRateLoaderService exchangeRateLoaderService;
 	
-	@BeforeClass
-	public static void setUpBeforeClass(){
-	  
-	}
+
 	
 	@Before
 	public void setUp(){
@@ -102,12 +100,12 @@ public class FXCalculatorServiceImplTest {
 		
 		Mockito.when(crossViaCurrencyLookUpService.fetchCrossViaCurrencyLookUpMap()).thenReturn(crossViaCurrencyLookUpMap);
 		
-		List<String> supportedFXCurrenciesList = new ArrayList<>();
-		supportedFXCurrenciesList.add("AUD");
-		supportedFXCurrenciesList.add("USD");
-		supportedFXCurrenciesList.add("GBP");
-		supportedFXCurrenciesList.add("EUR");
-		supportedFXCurrenciesList.add("NOK");
+		List<Currency> supportedFXCurrenciesList = new ArrayList<>();
+		supportedFXCurrenciesList.add(Currency.getInstance("AUD"));
+		supportedFXCurrenciesList.add(Currency.getInstance("USD"));
+		supportedFXCurrenciesList.add(Currency.getInstance("GBP"));
+		supportedFXCurrenciesList.add(Currency.getInstance("EUR"));
+		supportedFXCurrenciesList.add(Currency.getInstance("NOK"));
 		
 		Mockito.when(crossViaCurrencyLookUpService.fetchSupportedFXCurrenciesList()).thenReturn(supportedFXCurrenciesList);
 		
@@ -140,19 +138,63 @@ public class FXCalculatorServiceImplTest {
 	}
 	
 	@Test(expected=FXDetailValidationException.class)
-	public void validateBaseTermCurrenciesTestThrowsFXDetailValidationException() throws FXDetailValidationException, UnSupportedCurrencyException{
+	public void validateBaseTermCurrenciesTestThrowsFXDetailValidationExceptionForBaseCurrencyCode() throws FXDetailValidationException, UnSupportedCurrencyException{
 		String baseCurrencyCode = "";
+		String termCurrencyCode ="USD";
+		fxCalculatorServiceImpl.validateBaseTermCurrencies(baseCurrencyCode, termCurrencyCode);
+	}
+	
+	@Test(expected=FXDetailValidationException.class)
+	public void validateBaseTermCurrenciesTestThrowsFXDetailValidationExceptionForTermCurrencyCode() throws FXDetailValidationException, UnSupportedCurrencyException{
+		String baseCurrencyCode = "USD";
 		String termCurrencyCode ="";
 		fxCalculatorServiceImpl.validateBaseTermCurrencies(baseCurrencyCode, termCurrencyCode);
 	}
 	
-	@Test(expected=UnSupportedCurrencyException.class)
-	public void validateBaseTermCurrenciesTestThrowsUnSupportedCurrencyException() throws FXDetailValidationException, UnSupportedCurrencyException{
+	@Test(expected=FXDetailValidationException.class)
+	public void validateBaseTermCurrenciesTestThrowsFXDetailValidationExceptionForBaseCurrencyCodeNullValue() throws FXDetailValidationException, UnSupportedCurrencyException{
+		String baseCurrencyCode = null;
+		String termCurrencyCode ="USD";
+		fxCalculatorServiceImpl.validateBaseTermCurrencies(baseCurrencyCode, termCurrencyCode);
+	}
+	
+	@Test(expected=FXDetailValidationException.class)
+	public void validateBaseTermCurrenciesTestThrowsFXDetailValidationExceptionForTermCurrencyCodeNullValue() throws FXDetailValidationException, UnSupportedCurrencyException{
 		String baseCurrencyCode = "USD";
-		String termCurrencyCode ="WIT";
+		String termCurrencyCode =null;
+		fxCalculatorServiceImpl.validateBaseTermCurrencies(baseCurrencyCode, termCurrencyCode);
+	}
+	
+	@Test(expected=UnSupportedCurrencyException.class)
+	public void validateBaseTermCurrenciesTestThrowsUnSupportedCurrencyExceptionForTermCurrencyCode() throws FXDetailValidationException, UnSupportedCurrencyException{
+		String baseCurrencyCode = "USD";
+		String termCurrencyCode ="CRC";
 		fxCalculatorServiceImpl.validateBaseTermCurrencies(baseCurrencyCode, termCurrencyCode);
 		
 	}
+	@Test(expected=UnSupportedCurrencyException.class)
+	public void validateBaseTermCurrenciesTestThrowsUnSupportedCurrencyExceptionForbaseCurrencyCode() throws FXDetailValidationException, UnSupportedCurrencyException{
+		String baseCurrencyCode = "CRC";
+		String termCurrencyCode ="USD";
+		fxCalculatorServiceImpl.validateBaseTermCurrencies(baseCurrencyCode, termCurrencyCode);
+		
+	}
+	
+	@Test(expected=FXDetailValidationException.class)
+	public void checkIfBaseTermCurrencyIsSupportedTestThrowsFXValidationExceptionForTermCurrencyCode() throws FXDetailValidationException, UnSupportedCurrencyException{
+		String baseCurrencyCode = "USD";
+		String termCurrencyCode ="WAK";
+		fxCalculatorServiceImpl.checkIfBaseTermCurrencyIsSupported(baseCurrencyCode, termCurrencyCode);
+		
+	}
+	@Test(expected=FXDetailValidationException.class)
+	public void checkIfBaseTermCurrencyIsSupportedTestThrowsFXValidationExceptionForBaseCurrencyCode() throws FXDetailValidationException, UnSupportedCurrencyException{
+		String baseCurrencyCode = "WAK";
+		String termCurrencyCode ="USD";
+		fxCalculatorServiceImpl.checkIfBaseTermCurrencyIsSupported(baseCurrencyCode, termCurrencyCode);
+		
+	}
+	
 	@Test
 	public void validateBaseTermCurrenciesTesthouldNotThrowUnSupportedCurrencyException() throws FXDetailValidationException, UnSupportedCurrencyException{
 		String baseCurrencyCode = "USD";
@@ -160,6 +202,7 @@ public class FXCalculatorServiceImplTest {
 		fxCalculatorServiceImpl.validateBaseTermCurrencies(baseCurrencyCode, termCurrencyCode);
 		
 	}
+	
 	
 	@Test
 	public void formatConvertedAmountTest(){
@@ -178,7 +221,58 @@ public class FXCalculatorServiceImplTest {
 	@Test
 	public void computeFXAmountTest() throws FXDetailValidationException, UnSupportedCurrencyException{
 		
-		assertEquals(83.71,fxCalculatorServiceImpl.calculateFXAmount("AUD", "100.00", "USD").doubleValue(),0.1);
-		assertEquals(110.35,fxCalculatorServiceImpl.calculateFXAmount("GBP", "10.00", "NOK").doubleValue(),0.1);
+		assertEquals(83.71,fxCalculatorServiceImpl.calculateFXAmount("AUD", "USD", new BigDecimal(100.00)).doubleValue(),0.1);
+		assertEquals(110.35,fxCalculatorServiceImpl.calculateFXAmount("GBP", "NOK", new BigDecimal(10.00)).doubleValue(),0.1);
 	}
+	
+	@Test
+	public void displayResponseMessageTest(){
+		String expectedResponse ="USD 10.00 = AUD 11.95";
+		String baseCurrencyCode="USD";
+		String termCurrencyCode="AUD";
+		BigDecimal baseCurrAmt= new BigDecimal(10).setScale(Currency.getInstance(baseCurrencyCode).getDefaultFractionDigits(),RoundingMode.UP);
+		BigDecimal termCurrAmt= new BigDecimal(11.95).setScale(Currency.getInstance(termCurrencyCode).getDefaultFractionDigits(),RoundingMode.UP);
+		assertEquals(expectedResponse,fxCalculatorServiceImpl.displayResponseMessage(baseCurrencyCode, termCurrencyCode,baseCurrAmt, termCurrAmt));
+		
+		expectedResponse="USD 0.50 = AUD 0.12";
+		baseCurrAmt= new BigDecimal(0.5).setScale(Currency.getInstance(baseCurrencyCode).getDefaultFractionDigits(),RoundingMode.UP);
+		termCurrAmt= new BigDecimal(0.12).setScale(Currency.getInstance(termCurrencyCode).getDefaultFractionDigits(),RoundingMode.UP);
+		assertEquals(expectedResponse,fxCalculatorServiceImpl.displayResponseMessage(baseCurrencyCode, termCurrencyCode,baseCurrAmt, termCurrAmt));
+		
+		baseCurrencyCode="AUD"	;
+		termCurrencyCode="JPY";
+		expectedResponse ="AUD 10.00 = JPY 1200";
+	    baseCurrAmt= new BigDecimal(10).setScale(Currency.getInstance(baseCurrencyCode).getDefaultFractionDigits(),RoundingMode.UP);
+		termCurrAmt= new BigDecimal(1200).setScale(Currency.getInstance(termCurrencyCode).getDefaultFractionDigits(),RoundingMode.UP);
+		
+		 assertEquals(expectedResponse,fxCalculatorServiceImpl.displayResponseMessage(baseCurrencyCode, termCurrencyCode,baseCurrAmt, termCurrAmt));
+	}
+	
+	    @Test(expected=FXDetailValidationException.class)
+		public void validateBaseCurrencyAmountTestThrowsException() throws FXDetailValidationException{
+		   fxCalculatorServiceImpl.validateBaseCurrencyAmount("25.6S");
+		}
+		
+	    @Test
+		public void validateBaseCurrencyAmountTestDoesNotThrowException() throws FXDetailValidationException{
+		   fxCalculatorServiceImpl.validateBaseCurrencyAmount("25.65");
+		}
+	    
+	    public void computeFXConversionTest() throws FXDetailValidationException, UnSupportedCurrencyException{
+	    	
+	    	String baseCurrencyCode= "USD";
+	    	String baseCurrencyAmountString="10.00";
+	    	String termCurrencyCode= "AUD";
+	    	String expectedResponse ="USD 10.00 = AUD 11.95";
+	    	assertEquals(expectedResponse,fxCalculatorServiceImpl.computeFXConversion(baseCurrencyCode, baseCurrencyAmountString, termCurrencyCode));
+	    	
+	    	baseCurrencyCode= "USD";
+	    	baseCurrencyAmountString="10.00";
+	    	termCurrencyCode= "USD";
+	    	expectedResponse ="USD 10.00 = USD 10.00";
+	    	Whitebox.setInternalState(fxCalculatorServiceImpl, "sameBaseTermCurrency", true);
+	    	assertEquals(expectedResponse,fxCalculatorServiceImpl.computeFXConversion(baseCurrencyCode, baseCurrencyAmountString, termCurrencyCode));
+	    	
+	    }
+		
 }

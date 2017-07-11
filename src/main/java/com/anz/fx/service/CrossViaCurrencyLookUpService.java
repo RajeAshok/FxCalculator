@@ -1,5 +1,6 @@
 package com.anz.fx.service;
 
+import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ public interface CrossViaCurrencyLookUpService {
 	 
 	 Map<String,List<CurrencyPair>> fetchCrossViaCurrencyLookUpMap();
 	 
-	 List<String> fetchSupportedFXCurrenciesList();
+	 List<Currency> fetchSupportedFXCurrenciesList();
 	 
 	 
 }
