@@ -11,10 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import com.anz.fx.exception.FXDetailValidationException;
 import com.anz.fx.model.CurrencyPair;
 import com.anz.fx.model.LookUpType;
 import com.anz.fx.service.CrossViaCurrencyLookUpService;
@@ -22,6 +25,8 @@ import com.anz.fx.service.CrossViaCurrencyLookUpService;
 @Service
 public class CrossViaCurrencyLookUpServiceImpl implements
 		CrossViaCurrencyLookUpService {
+	
+   private static final Logger LOG = LoggerFactory.getLogger(CrossViaCurrencyLookUpServiceImpl.class);	
 
    private Map<CurrencyPair, String> directIndirectCurrLookUpMap = new HashMap<>();
    
@@ -30,20 +35,14 @@ public class CrossViaCurrencyLookUpServiceImpl implements
    private List<Currency> supportedFXCurrenciesList = new ArrayList<>();
 	 
 	
-   @Value("classpath:FXCrossViaLookUp.txt")
+    @Value("classpath:FXCrossViaLookUp.txt")
 	private Resource crossVialookUpResource;
    
 	@Override
-	public void loadCrossViaCurrencyLookUpFromFile() {
+	public void loadCrossViaCurrencyLookUpFromFile() throws FXDetailValidationException {
 		
-		try {
-			List<String> baseTermCurrencyLookUpDetails = Files.readAllLines(
-					Paths.get(crossVialookUpResource.getURI()), StandardCharsets.UTF_8);
-			System.out.println("Input number of lines..."
-					+ baseTermCurrencyLookUpDetails.size());
-			
-			System.out.println("baseTermCurrencyLookUpDetails first item"
-					+ baseTermCurrencyLookUpDetails.get(0));
+		    LOG.debug("loading currency pair details from flat file");
+			List<String> baseTermCurrencyLookUpDetails = loadResourceFile();
 			
 			String[] termCurrencyElements = baseTermCurrencyLookUpDetails.get(0).split("\\s+");
 			List<String> termCurrencyList = new ArrayList<String>(Arrays.asList(termCurrencyElements));
@@ -51,12 +50,10 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 			
 			List<CurrencyPair> viaEURCurrencyPairList = new ArrayList<>();
 			List<CurrencyPair> viaUSDCurrencyPairList = new ArrayList<>();
-			
-			System.out.println("baseTermCurrencyLookUpDetails.size().." +baseTermCurrencyLookUpDetails.size());
+			;
 			
 			for (int i = 1; i < baseTermCurrencyLookUpDetails.size(); i++) {
 				String baseCurrencyLookUpString =baseTermCurrencyLookUpDetails.get(i);
-				//baseCurrencyLookUpString- AUD 1:1 USD USD USD USD USD USD USD USD USD D
 				String[] baseCurrencyLookUpTypeElements = baseCurrencyLookUpString.split("\\s+");
 				List<String> baseCurrencyLookUpTypeList = new ArrayList<String>(Arrays.asList(baseCurrencyLookUpTypeElements));
 				String baseCurrencyKey = baseCurrencyLookUpTypeList.get(0);
@@ -80,38 +77,29 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 				    }
 				}
 			}
-			///System.out.println("viaEURCurrencyPairList.." +viaEURCurrencyPairList.size());
-			//System.out.println("viaUSDCurrencyPairList.." +viaUSDCurrencyPairList.size());
-		//	viaUSDCurrencyPairList.forEach((CurrencyPair) -> System.out.println("usdList item --> "+ CurrencyPair.getBaseCurrKey() + ":"+ CurrencyPair.getTermCurrKey() ));
-			//System.out.println("directIndirectCurrLookUpMap.." +directIndirectCurrLookUpMap.size());
+
 			setSupportedFXCurrenciesList(supportedFXCurrenciesList);
-			System.out.println("supportedFXCurrenciesList.." +supportedFXCurrenciesList.size());
 			this.setDirectIndirectCurrLookUpMap(directIndirectCurrLookUpMap);
 			
 			crossViaCurrencyLookUpMap.put(LookUpType.VIAUSD.getValue(), viaUSDCurrencyPairList);
 			crossViaCurrencyLookUpMap.put(LookUpType.VIAEUR.getValue(), viaEURCurrencyPairList);
 			this.setCrossViaCurrencyLookUpMap(crossViaCurrencyLookUpMap);
-
-		} catch (IOException ex) {
-			System.out.println(" reader cound not be initialized. ");
+	}
+	
+	protected List<String> loadResourceFile() throws FXDetailValidationException{
+		try {
+			List<String> baseTermCurrencyLookUpDetails = Files.readAllLines(
+					Paths.get(crossVialookUpResource.getURI()), StandardCharsets.UTF_8);
+			return baseTermCurrencyLookUpDetails;
+		} catch (IOException e) {
+			throw new FXDetailValidationException("Error loading he input Resource file");
 		}
-
-	}
-	
-	@Override
-	public Map<CurrencyPair, String> fetchDirectIndirectCurrLookUpMap() {
-		return this.getDirectIndirectCurrLookUpMap();
-	}
-	
-	@Override
-	public Map<String, List<CurrencyPair>> fetchCrossViaCurrencyLookUpMap() {
-		return this.getCrossViaCurrencyLookUpMap();
 	}
 
 	public Map<CurrencyPair, String> getDirectIndirectCurrLookUpMap() {
 		return this.directIndirectCurrLookUpMap;
 	}
-
+	
 	public void setDirectIndirectCurrLookUpMap(
 			Map<CurrencyPair, String> directIndirectCurrLookUpMap) {
 		this.directIndirectCurrLookUpMap = directIndirectCurrLookUpMap;
@@ -128,12 +116,6 @@ public class CrossViaCurrencyLookUpServiceImpl implements
 
 	public List<Currency> getSupportedFXCurrenciesList() {
 		return supportedFXCurrenciesList;
-	}
-
-	@Override
-	public List<Currency> fetchSupportedFXCurrenciesList() {
-		// TODO Auto-generated method stub
-		return getSupportedFXCurrenciesList();
 	}
 
 	public void setSupportedFXCurrenciesList(

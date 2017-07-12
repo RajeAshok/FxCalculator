@@ -54,7 +54,7 @@ public class FXCalculatorServiceImplTest {
 		baseTermCurrencyExchangeRateMap.put(new CurrencyPair("EUR", "NOK"),8.6651);
 		
 		Whitebox.setInternalState(fxCalculatorServiceImpl, "exchangeRateLoaderService", exchangeRateLoaderService);
-		Mockito.when(exchangeRateLoaderService.fetchBaseCurrencyExchangeRateMap()).thenReturn(baseTermCurrencyExchangeRateMap);
+		Mockito.when(exchangeRateLoaderService.getBaseTermCurrencyExchangeRateMap()).thenReturn(baseTermCurrencyExchangeRateMap);
 		
 		//loading Direction lookup Map
 		CurrencyPair  usdAud = new CurrencyPair("USD", "AUD");
@@ -81,7 +81,7 @@ public class FXCalculatorServiceImplTest {
 		
 		
 		Whitebox.setInternalState(fxCalculatorServiceImpl, "crossViaCurrencyLookUpService", crossViaCurrencyLookUpService);
-		Mockito.when(crossViaCurrencyLookUpService.fetchDirectIndirectCurrLookUpMap()).thenReturn(directionLookUpMap);
+		Mockito.when(crossViaCurrencyLookUpService.getDirectIndirectCurrLookUpMap()).thenReturn(directionLookUpMap);
 		
 		//loading CrossViaCurrency Map
 		Map<String,List<CurrencyPair>> crossViaCurrencyLookUpMap = new HashMap<>();
@@ -98,7 +98,7 @@ public class FXCalculatorServiceImplTest {
 		crossViaCurrencyLookUpMap.put("USD", viaUSDCurrencyPairList);
 		crossViaCurrencyLookUpMap.put("EUR", viaEURCurrencyPairList);
 		
-		Mockito.when(crossViaCurrencyLookUpService.fetchCrossViaCurrencyLookUpMap()).thenReturn(crossViaCurrencyLookUpMap);
+		Mockito.when(crossViaCurrencyLookUpService.getCrossViaCurrencyLookUpMap()).thenReturn(crossViaCurrencyLookUpMap);
 		
 		List<Currency> supportedFXCurrenciesList = new ArrayList<>();
 		supportedFXCurrenciesList.add(Currency.getInstance("AUD"));
@@ -107,7 +107,7 @@ public class FXCalculatorServiceImplTest {
 		supportedFXCurrenciesList.add(Currency.getInstance("EUR"));
 		supportedFXCurrenciesList.add(Currency.getInstance("NOK"));
 		
-		Mockito.when(crossViaCurrencyLookUpService.fetchSupportedFXCurrenciesList()).thenReturn(supportedFXCurrenciesList);
+		Mockito.when(crossViaCurrencyLookUpService.getSupportedFXCurrenciesList()).thenReturn(supportedFXCurrenciesList);
 		
 	}
 
@@ -258,6 +258,7 @@ public class FXCalculatorServiceImplTest {
 		   fxCalculatorServiceImpl.validateBaseCurrencyAmount("25.65");
 		}
 	    
+	    @Test
 	    public void computeFXConversionTest() throws FXDetailValidationException, UnSupportedCurrencyException{
 	    	
 	    	String baseCurrencyCode= "USD";
@@ -270,7 +271,6 @@ public class FXCalculatorServiceImplTest {
 	    	baseCurrencyAmountString="10.00";
 	    	termCurrencyCode= "USD";
 	    	expectedResponse ="USD 10.00 = USD 10.00";
-	    	Whitebox.setInternalState(fxCalculatorServiceImpl, "sameBaseTermCurrency", true);
 	    	assertEquals(expectedResponse,fxCalculatorServiceImpl.computeFXConversion(baseCurrencyCode, baseCurrencyAmountString, termCurrencyCode));
 	    	
 	    }
