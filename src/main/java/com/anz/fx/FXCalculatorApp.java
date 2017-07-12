@@ -1,19 +1,22 @@
 package com.anz.fx;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.anz.fx.exception.FXDetailValidationException;
 import com.anz.fx.exception.UnSupportedCurrencyException;
 import com.anz.fx.service.FXCalculatorService;
 
 /**
- * FX Calculator App 
- * @author AshRaje
+ * 
+ * FX Calculator Application :
+ * Calculates the foreign exchange Amount for a given pair of currency codes and the exchange amount 
+ * Input should be specified in the format: <BASE CURRENCY CODE> <AMOUNT> IN <TERM CURRENCY CODE>
+ * Application can be run via IDE Command line Argument or from Command line directly
  *
  */
 
@@ -22,36 +25,60 @@ public class FXCalculatorApp implements CommandLineRunner {
 
 	@Autowired
 	FXCalculatorService fxCalcService;
-	
-	public static void main(String[] args) throws IOException {
-			SpringApplication.run(FXCalculatorApp.class,args);
+
+	private static final Logger LOG = LoggerFactory.getLogger(FXCalculatorApp.class);
+
+	public static void main(String[] args){
+
+		SpringApplication.run(FXCalculatorApp.class,args);
+
 	}
 
 	@Override
-	public void run(String... args) throws Exception {
-		try {
-			System.out.println("Please enter Below Details in following format");
-			System.out.println("<Base Currency Code> <Amount to be converted> in <Term CurrencyCode>");
-			String[] fxCurrencyDetails = args;
-			System.out.println("n run method.." + fxCurrencyDetails);
-			if(fxCurrencyDetails != null && fxCurrencyDetails.length >0 ){
-				
-				System.out.println("Base Curr: " + fxCurrencyDetails[0]);
-				System.out.println("Base Amount to be converted: " + fxCurrencyDetails[1]);
-				System.out.println("In:.." + fxCurrencyDetails[2]);
-				System.out.println("Term Currency:.." + fxCurrencyDetails[3]);
+	public void run(String... args) throws FXDetailValidationException, UnSupportedCurrencyException{
 
-				BigDecimal convertedAmount=fxCalcService.calculateFXAmount( fxCurrencyDetails[0],  new BigDecimal(fxCurrencyDetails[1]), fxCurrencyDetails[3]);
-				System.out.println("convertedAmount is..." +convertedAmount);
+		System.out.println("Please enter FX details below in  the following format :");
+		System.out.println("<Base Currency Code> <Amount to be converted> in <Term CurrencyCode>");
+
+		String baseCurrencyCode="";
+		String termCurrencyCode ="";
+		String baseCurrencyAmount ="";
+		String[] fxCurrencyDetails = null;
+		try{	
+			if(args.length ==1){                                           //Input from Command line
+				String fxCurrencyDetailsString = args[0]; 
+				fxCurrencyDetails = fxCurrencyDetailsString.split(" ");
+			}else{ //                                                      //Input from IDE Command line Run Configurations
+				fxCurrencyDetails = args;	                   
 			}
 
-		} catch (UnSupportedCurrencyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if(fxCurrencyDetails != null && fxCurrencyDetails.length > 0 ){
+				if(fxCurrencyDetails.length != 4){
+					String validationErrorMesssage = "Please enter details in correct format : <BaseCurrencyCode> <BaseCurrencyAmount> in <TermcurrencyCode>";
+					throw new FXDetailValidationException(validationErrorMesssage);
+				}
+				baseCurrencyCode=fxCurrencyDetails[0];
+				baseCurrencyAmount= fxCurrencyDetails[1];
+				termCurrencyCode= fxCurrencyDetails[3];
+			}
+
+			String displayMessage=fxCalcService.computeFXConversion(baseCurrencyCode, baseCurrencyAmount, termCurrencyCode);
+			LOG.debug("In FXCalculatorApp class, Completed  computeFXConversion . Returned conversion detail is "+ displayMessage );
+            System.out.println("****************************OUTPUT****************************");
+            System.out.println(displayMessage);
+            System.out.println("****************************OUTPUT****************************");
+		}catch (FXDetailValidationException fXDetailValidationException){
+			System.out.println("****************ERROR*****************************************");
+			System.out.println(fXDetailValidationException.getValidationErrorMessage());
+			LOG.error(fXDetailValidationException.getValidationErrorMessage());
+			System.out.println("****************ERROR*****************************************");
+
+		}catch (UnSupportedCurrencyException unSupportedCurrencyException){
+			System.out.println("****************ERROR******************************************");
+			System.out.println(unSupportedCurrencyException.getUnSupportedCurrencyErrorMessage());
+			LOG.error(unSupportedCurrencyException.toString());
+			System.out.println("****************ERROR*******************************************");
 		}
-
 	}
-
-
-
 }
+
