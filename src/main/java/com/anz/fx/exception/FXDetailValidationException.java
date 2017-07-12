@@ -13,11 +13,19 @@ public class FXDetailValidationException extends Exception {
 	}
 	
 	public FXDetailValidationException(String validationErrorMesssage){
-		this.validationErrorMessage =validationErrorMesssage;
+		super(validationErrorMesssage);
 	}
 	
 	@Override
 	public String toString(){
 		return "Validation errors in the provided FX details. " + validationErrorMessage;
+	}
+
+	public String getValidationErrorMessage() {
+		return validationErrorMessage;
+	}
+
+	public void setValidationErrorMessage(String validationErrorMessage) {
+		this.validationErrorMessage = validationErrorMessage;
 	}
 }
