@@ -38,23 +38,16 @@ public class CrossViaCurrencyLookUpServiceImplTest {
 	
 	@Before
 	public void setUp() throws FXDetailValidationException{
-		crossViaCurrencyLookUpServiceImpl = Mockito.spy(new CrossViaCurrencyLookUpServiceImpl());
 		
-		URL url = this.getClass().getResource("/FXCrossViaLookUp.txt");
-		System.out.println("url..." + url);
-	//	File file = new File(url.getFile());
+		crossViaCurrencyLookUpServiceImpl = Mockito.spy(new CrossViaCurrencyLookUpServiceImpl());
 		Whitebox.setInternalState(crossViaCurrencyLookUpServiceImpl, "crossVialookUpResource", crossVialookUpResource);
 		Whitebox.setInternalState(crossViaCurrencyLookUpServiceImpl, "directIndirectCurrLookUpMap", directIndirectCurrLookUpMap);
 		Whitebox.setInternalState(crossViaCurrencyLookUpServiceImpl, "crossViaCurrencyLookUpMap", crossViaCurrencyLookUpMap);
 		Whitebox.setInternalState(crossViaCurrencyLookUpServiceImpl, "supportedFXCurrenciesList", supportedFXCurrenciesList);
-		//Mockito.when(exchangeRateLookUpResource.getURI()).thenReturn(url.toURI());
 		List<String> resourceFileStringList = new ArrayList<>();
 		resourceFileStringList.add("/   AUD CAD CNY CZK DKK EUR GBP JPY NOK NZD USD");
 		resourceFileStringList.add("AUD 1:1 USD USD USD USD USD USD USD USD USD D");
 		resourceFileStringList.add("EUR USD USD USD D   D   1:1 USD USD D   USD D");
-		//resourceFileStringList.add("GBP USD USD USD USD USD USD 1:1 USD USD USD D");
-		//resourceFileStringList.add("JPY USD USD USD USD USD USD USD 1:1 USD USD Inv");
-		//resourceFileStringList.add("NOK USD USD USD EUR EUR Inv USD USD 1:1 USD EUR");
 		resourceFileStringList.add("USD Inv Inv D   EUR EUR Inv Inv D   EUR Inv 1:1");
 		
 		supportedFXCurrenciesList.add(Currency.getInstance("AUD"));

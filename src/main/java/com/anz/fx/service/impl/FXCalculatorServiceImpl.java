@@ -94,11 +94,9 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 				.getDirectIndirectCurrLookUpMap();
 
 		if (directionLookUpMap.keySet().contains(currencyPair)) {
-			System.out.println("It is a direct or Indirect  look Up");
 			lookUpType = directionLookUpMap.get(currencyPair);
 
 		} else {
-			System.out.println("Involves Via curr");
 			for (Map.Entry<String,List<CurrencyPair>> entry : crossViaCurrencyLookUpMap.entrySet()) {
 				List<CurrencyPair> crossCurrencyList = (List<CurrencyPair>) entry.getValue();
 				if (crossCurrencyList.contains(currencyPair)) {
@@ -201,12 +199,10 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 		StringBuilder displayErrorMessage= new StringBuilder("Validation Error.");
 		if(baseCurrencyCode == null || baseCurrencyCode.isEmpty()){
 			displayErrorMessage.append("Base Currency Code cannot be empty .Please enter a value. ");
-			LOG.error("validateBaseTermCurrencies(): "+ displayErrorMessage.toString());
 			throw new FXDetailValidationException(displayErrorMessage.toString());
 		}
 		if(termCurrencyCode == null || termCurrencyCode.isEmpty()){
 			displayErrorMessage.append("Term Currency Code cannot be empty .Please enter a value. ");
-			LOG.error("validateBaseTermCurrencies(): "+ displayErrorMessage.toString());
 			throw new FXDetailValidationException(displayErrorMessage.toString());
 		}
 			
@@ -231,25 +227,21 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 			baseCurrency=Currency.getInstance(baseCurrencyCode);
 		}catch(IllegalArgumentException illegalArgumentException){
 			displayErrorMessage.append("Base currency code provided is not a valid ISO 4217 currency code .Please enter a valid Base currency code. ");
-			LOG.error("checkIfBaseTermCurrencyIsSupported(): "+ displayErrorMessage.toString()); 
 			throw new FXDetailValidationException(displayErrorMessage.toString());
 		}
 		try{
 			termCurrency=Currency.getInstance(termCurrencyCode);
 		}catch(IllegalArgumentException illegalArgumentException){
 			displayErrorMessage.append("Term currency code provided is not a valid ISO 4217 currency code .Please enter a valid Term currency code. ");
-			LOG.error("checkIfBaseTermCurrencyIsSupported(): "+ displayErrorMessage.toString());
 			throw new FXDetailValidationException(displayErrorMessage.toString());
 		}
 		
 		if (!supportedFXCurrenciesList.contains(baseCurrency)) {
-			displayErrorMessage.append("Base Currency Code provided is not supported .Please enter a valid Base Currency Code. ");
-			LOG.error("checkIfBaseTermCurrencyIsSupported(): "+ displayErrorMessage.toString());
+			displayErrorMessage.append("Base Currency Code provided is not a supported FX currency. Please enter a valid Base Currency Code. ");
 			throw new UnSupportedCurrencyException(displayErrorMessage.toString());
 		}
 		if (!supportedFXCurrenciesList.contains(termCurrency)) {
-			displayErrorMessage.append("Term Currency Code provided is not supported .Please enter a valid Term Currency Code. ");
-			LOG.error("checkIfBaseTermCurrencyIsSupported(): "+ displayErrorMessage.toString()); 
+			displayErrorMessage.append("Term Currency Code provided is not a supported FX currency .Please enter a valid Term Currency Code. ");
 			throw new UnSupportedCurrencyException(displayErrorMessage.toString());
 		}
 
@@ -267,8 +259,7 @@ public class FXCalculatorServiceImpl implements FXCalculatorService {
 		try{
 			baseCurrencyAmount = new BigDecimal(baseCurrAmount);
 		}catch(NumberFormatException ne){
-			String errorMessage ="Error Occured. Enter a valid number in Amount field";
-			LOG.error("validateBaseCurrencyAmount(): "+ errorMessage); 
+			String errorMessage ="Please enter a valid number in base currency amount field";
 			throw new FXDetailValidationException(errorMessage);
 		}
 		return baseCurrencyAmount;

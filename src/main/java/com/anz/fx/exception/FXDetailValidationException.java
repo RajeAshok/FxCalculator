@@ -1,10 +1,13 @@
 package com.anz.fx.exception;
 
+/**
+ * Custom Exception class to handle FX Validation exception.
+ * @author AshRaje
+ *
+ */
 public class FXDetailValidationException extends Exception {
 
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 1L;
 	private String validationErrorMessage;
 	
@@ -14,6 +17,7 @@ public class FXDetailValidationException extends Exception {
 	
 	public FXDetailValidationException(String validationErrorMesssage){
 		super(validationErrorMesssage);
+		this.validationErrorMessage= validationErrorMesssage;
 	}
 	
 	@Override

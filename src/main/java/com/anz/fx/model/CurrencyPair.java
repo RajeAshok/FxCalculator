@@ -1,5 +1,11 @@
 package com.anz.fx.model;
 
+/**
+ * 
+ * @author AshRaje
+ * Model object : Currency pair to represent BASE/TERM 
+ *
+ */
 public class CurrencyPair {
 	private  String baseCurrKey;
 

@@ -1,5 +1,9 @@
 package com.anz.fx.model;
-
+/**
+ * 
+ * @author AshRaje
+ *Enum to represent the cross via look up detail for currency pairs
+ */
 public enum LookUpType {
 	DIRECT("DIR"),
 	INVERSE("INV"),
