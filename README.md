@@ -1,5 +1,5 @@
 # fxCalculator
-Calculate foreign exchange rate for a given currency pair
+Calculate foreign exchange rate for a given currency pair of tradeable currencies
 
 ##Development Stack
 - Java 8
@@ -27,3 +27,4 @@ Calculate foreign exchange rate for a given currency pair
    - mvn clean test
  - Please check the code coverage reports at   
    - /fxCalculator/target/site/jacoco-ut/index.html
+
